@@ -1,0 +1,123 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Menu Crear Personal{% endblock %}
+
+{% block dashboard_content %}
+
+<h2 class="text-xl font-bold mb-4 text-[var(--focus)]">Personal registrado</h2>
+<table class="w-full bg-white shadow rounded text-center py-1">
+    <tr>
+        <th class="align-middle">Cédula</th>
+        <th class="align-middle">Nombre</th>
+        <th class="align-middle">Teléfono</th>
+        <th class="align-middle">Email</th>
+        <th class="align-middle">Rol</th>
+        <th class="align-middle">Acciones</th>
+    </tr>
+    {% for persona in personas %}
+    <tr class="my-1">
+        <td class="align-middle">{{ persona.id_cedula }}</td>
+        <td class="align-middle">{{ persona.nombre }}</td>
+        <td class="align-middle">{{ persona.telefono }}</td>
+        <td class="align-middle">{{ persona.email }}</td>
+        <td class="align-middle">{{ persona.rol }}</td>
+        <td class="align-middle">
+            <button type="button"
+                    onclick="abrirModal('{{ persona.pk }}')"
+                    class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1 rounded">
+                Editar
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Botón Crear -->
+<div class="mt-4">
+    <button type="button"
+            onclick="document.getElementById('modalCrear').classList.remove('hidden')"
+            class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-4 py-2 rounded">
+        Crear Personal
+    </button>
+</div>
+
+<!-- Modal Crear -->
+<div id="modalCrear" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Crear Personal</h2>
+    <form method="post">
+      {% csrf_token %}
+      <strong>Cédula:</strong>
+      <input type="text" name="id_cedula" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Nombre:</strong>
+      <input type="text" name="nombre" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Teléfono:</strong>
+      <input type="text" name="telefono" class="border rounded px-3 py-2 w-full mb-2">
+      <strong>Email:</strong>
+      <input type="email" name="email" class="border rounded px-3 py-2 w-full mb-2">
+      <strong>Rol:</strong>
+      <select name="rol" class="border rounded px-3 py-2 w-full mb-2">
+        <option value="Agricultor">Agricultor</option>
+        <option value="Fumigador">Fumigador</option>
+        <option value="Recolector">Recolector</option>
+        <option value="Varios">Varios</option>
+      </select>
+      <button type="submit" name="crear_personal" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar</button>
+      <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal único para editar persona -->
+<div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Editar Personal</h2>
+    <form method="post" id="formEditarPersona">
+      {% csrf_token %}
+      <input type="hidden" name="persona_id" id="personaIdInput">
+
+      <strong>Cédula:</strong>
+      <input type="text" id="cedulaInput" disabled class="border rounded px-3 py-2 w-full mb-2">
+
+      <strong>Nombre:</strong>
+      <input type="text" name="nombre" id="nombreInput" class="border rounded px-3 py-2 w-full mb-2" required>
+
+      <strong>Teléfono:</strong>
+      <input type="text" name="telefono" id="telefonoInput" class="border rounded px-3 py-2 w-full mb-2">
+
+      <strong>Email:</strong>
+      <input type="email" name="email" id="emailInput" class="border rounded px-3 py-2 w-full mb-2">
+
+      <strong>Rol:</strong>
+      <select name="rol" id="rolInput" class="border rounded px-3 py-2 w-full mb-2">
+        <option value="Agricultor">Agricultor</option>
+        <option value="Fumigador">Fumigador</option>
+        <option value="Recolector">Recolector</option>
+        <option value="Varios">Varios</option>
+      </select>
+      <button type="submit" name="editar_personal" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar cambios</button>
+      <button type="button" onclick="document.getElementById('modalEditar').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+    </form>
+  </div>
+</div>
+<script>
+  function abrirModal(id) {
+    id = parseInt(id); // convertir a número
+    fetch(`/persona/${id}/`) // endpoint que devuelve datos de la persona
+      .then(response => response.json())
+      .then(data => {
+          // Mostrar modal
+          document.getElementById("modalEditar").classList.remove("hidden");
+
+          // Llenar inputs
+          document.getElementById("personaIdInput").value = data.persona.pk;
+          document.getElementById("cedulaInput").value = data.persona.id_cedula;
+          document.getElementById("nombreInput").value = data.persona.nombre;
+          document.getElementById("telefonoInput").value = data.persona.telefono;
+          document.getElementById("emailInput").value = data.persona.email;
+          document.getElementById("rolInput").value = data.persona.rol;
+      });
+  }
+</script>
+
+{% endblock %}
