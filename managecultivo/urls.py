@@ -17,6 +17,7 @@ urlpatterns = [
     path('crear-usuario/', views.crear_usuario, name='crear_usuario'),
     path("crear_zonaagricola/", views.crear_zonaagricola, name="crear_zonaagricola"),   
     
+    path("clima/", views.clima, name="clima"),
         # Vista principal: lista de personas, crear y editar
     path("crear_personal/", views.v_personal.crear_personal, name="crear_personal"),
     # Vista auxiliar: devolver datos en JSON para el modal, solo se usa en el boton editar

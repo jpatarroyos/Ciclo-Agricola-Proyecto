@@ -82,7 +82,7 @@
                         Consulta <span class="text-[10px] opacity-60">▼</span>
                       </span>
                       <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[180px] z-50 space-y-0.5 border border-white/5 bg-[var(--primary)]/90 lg:bg-[var(--focus)]">
-                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Consultar Clima</a></li>
+                          <li><a href="{% url 'clima' %}" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Consultar Clima</a></li>
                       </ul>
                   </li>
 
@@ -113,7 +113,7 @@
   </div>
 </nav>
 
-<div id="menu-overlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 hidden transition-opacity duration-300"></div>
+<div id="menu-overlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-20 hidden transition-opacity duration-300"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
