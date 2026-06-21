@@ -1,0 +1,26 @@
+.share-font {
+  font-family: 'Share Tech Mono', monospace;
+}
+
+:root {
+  --primary: #70b46d;
+  --secondary: #ffffff;
+  --focus: #54a351;
+  --edit: #fdc321;
+  --editFocus: #e0ac1d;
+  --cancel: #bdb8ae;
+  --cancelFocus: #797571;
+  --celdasel:#058af7;
+  --celdanor:#0f0f0f;
+}
+
+nav {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+
+footer {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
