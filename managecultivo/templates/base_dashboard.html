@@ -3,89 +3,117 @@
 {% load static %}
 
 {% block navbar %}
-<nav class="bg-[var(--primary)] p-4 text-[var(--secondary)] flex justify-between items-center relative z-40">
+<nav class="bg-[var(--primary)] text-[var(--secondary)] shadow-lg relative z-40">
+  <div class="max-w-full px-4 sm:px-6 ">
+    <div class="flex justify-between h-16 items-center">
+      
+      <div class="flex-shrink-0 font-extrabold text-xl tracking-tight flex items-center gap-2">
+        <a href="{% url 'bienvenida' %}" class="hover:opacity-90 transition-opacity flex items-center gap-1.5">
+          <span>🌱</span> AgroPlan
+        </a>
+      </div>
 
-  <div class="font-bold text-lg">
-    <a href="{% url 'bienvenida' %}">AgroPlan</a>
-  </div>
+      <div class="flex lg:hidden">
+        <button id="open-menu-btn" type="button" 
+                class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-[var(--focus)] focus:outline-hidden transition-colors cursor-pointer" 
+                aria-label="Abrir menú">
+          <svg class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
 
-  <button id="open-menu-btn" class="cursor-pointer lg:hidden p-2 block focus:outline-none" aria-label="Abrir menú">
-    <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
-      <path d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 5h14a1 1 0 110 2H3a1 1 0 110-2z"></path>
-    </svg>
-  </button>
+      <div id="sidebar-menu" 
+           class="fixed top-0 left-0 w-64 h-full bg-[var(--primary)] p-6 shadow-2xl transition-transform duration-300 transform -translate-x-full z-[60]
+                  lg:static lg:w-auto lg:h-auto lg:p-0 lg:shadow-none lg:transform-none lg:flex lg:flex-1 lg:justify-between lg:items-center lg:ml-10">
 
-  <div id="sidebar-menu" class="fixed top-0 left-0 w-64 h-full bg-[var(--primary)] p-6 shadow-2xl transition-transform duration-300 transform -translate-x-full z-[60]
-              lg:static lg:w-auto lg:h-auto lg:p-0 lg:shadow-none lg:transform-none lg:flex lg:flex-1 lg:justify-between lg:items-center lg:ml-8">
+        <div class="flex items-center justify-between lg:hidden mb-6 border-b border-gray-100/10 pb-4">
+          <span class="font-bold text-sm tracking-wider uppercase opacity-70">Menú Principal</span>
+          <button id="close-menu-btn" type="button" 
+                  class="cursor-pointer text-xl font-bold p-2 hover:bg-[var(--focus)] rounded-lg transition-colors focus:outline-hidden">✕</button>
+        </div>
 
-    <div class="flex justify-end lg:hidden mb-6">
-      <button id="close-menu-btn" class="cursor-pointer text-xl font-bold focus:outline-none">✕</button>
-    </div>
+        <ul class="flex flex-col space-y-2 lg:space-y-0 lg:flex-row lg:space-x-1 w-full lg:w-auto text-sm">
+          {% if user.is_authenticated %}
+              {% if user|has_group:"Administrador" %}
 
-    <ul class="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-6 w-full lg:w-auto">
-      {% if user.is_authenticated %}
-          {% if user|has_group:"Administrador" %}
+                  <li class="group relative">
+                      <span class="cursor-pointer font-semibold flex items-center justify-between lg:justify-start gap-1 py-2 px-3 rounded-lg hover:bg-[var(--focus)] transition-colors select-none">
+                        Admin <span class="text-[10px] opacity-60">▼</span>
+                      </span>
+                      <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[200px] z-50 space-y-0.5 border border-white/5 bg-[var(--primary)]/90 lg:bg-[var(--focus)]">
+                          <li><a href="{% url 'crear_usuario' %}" class="block px-3 py-2 hover:bg-[var(--primary)] lg:hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Crear Usuarios</a></li>
+                      </ul>
+                  </li>
 
-              <li class="group relative">
-                  <span class="cursor-pointer font-semibold block lg:inline py-1">Admin ▾</span>
-                  <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-2 rounded pl-4 lg:pl-2 mt-1 space-y-1 z-50">
-                      <li><a href="{% url 'crear_usuario' %}" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Crear Usuarios</a></li>
-                  </ul>
-              </li>
+                  <li class="group relative">
+                      <span class="cursor-pointer font-semibold flex items-center justify-between lg:justify-start gap-1 py-2 px-3 rounded-lg hover:bg-[var(--focus)] transition-colors select-none">
+                        Ciclo Agrícola <span class="text-[10px] opacity-60">▼</span>
+                      </span>
+                      <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[220px] z-50 space-y-0.5 border border-white/5 bg-[var(--primary)]/90 lg:bg-[var(--focus)]">
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Registrar Compras Insumos</a></li>
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Cultivo, Actividad, Insumo</a></li>
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Planear Ciclo de Cultivo</a></li>
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Consultar Ciclo</a></li>
+                      </ul>
+                  </li>
 
-              <li class="group relative">
-                  <span class="cursor-pointer font-semibold block lg:inline py-1">Ciclo Agrícola ▾</span>
-                  <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-2 rounded pl-4 lg:pl-2 mt-1 space-y-1 z-50">
-                      <li><a href="#" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Registrar Compras Insumos</a></li>
-                      <li><a href="#" class="block lg:whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Cultivo, Actividad, Insumo</a></li>
-                      <li><a href="#" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Planear Ciclo de Cultivo</a></li>
-                      <li><a href="#" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Consultar Ciclo</a></li>
-                  </ul>
-              </li>
+                  <li class="group relative">
+                      <span class="cursor-pointer font-semibold flex items-center justify-between lg:justify-start gap-1 py-2 px-3 rounded-lg hover:bg-[var(--focus)] transition-colors select-none">
+                        Monitoreo <span class="text-[10px] opacity-60">▼</span>
+                      </span>
+                      <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[180px] z-50 space-y-0.5 border border-white/5 bg-[var(--primary)]/90 lg:bg-[var(--focus)]">
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Datos del Monitoreo</a></li>
+                      </ul>
+                  </li>
 
-              <li class="group relative">
-                  <span class="cursor-pointer font-semibold block lg:inline py-1">Monitoreo ▾</span>
-                  <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-2 rounded pl-4 lg:pl-2 mt-1 space-y-1 z-50">
-                      <li><a href="#" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Datos del Monitoreo</a></li>
-                  </ul>
-              </li>
+                  <li class="group relative">
+                      <span class="cursor-pointer font-semibold flex items-center justify-between lg:justify-start gap-1 py-2 px-3 rounded-lg hover:bg-[var(--focus)] transition-colors select-none">
+                        Configurar <span class="text-[10px] opacity-60">▼</span>
+                      </span>
+                      <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[180px] z-50 space-y-0.5 border border-white/5 bg(--primary)/90 lg:bg-[var(--focus)]">
+                          <li><a href="{% url 'crear_zonaagricola' %}" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Crear Zona Agrícola</a></li>
+                          <li><a href="{% url 'crear_personal' %}" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Crear Personal</a></li>
+                      </ul>
+                  </li>
 
-              <li class="group relative">
-                  <span class="cursor-pointer font-semibold block lg:inline py-1">Configurar ▾</span>
-                  <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-2 rounded pl-4 lg:pl-2 mt-1 space-y-1 z-50">
-                      <li><a href="{% url 'crear_zonaagricola' %}" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Crear Zona Agrícola</a></li>
-                      <li><a href="{% url 'crear_personal' %}" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Crear Personal</a></li>
-                  </ul>
-              </li>
+                  <li class="group relative">
+                      <span class="cursor-pointer font-semibold flex items-center justify-between lg:justify-start gap-1 py-2 px-3 rounded-lg hover:bg-[var(--focus)] transition-colors select-none">
+                        Consulta <span class="text-[10px] opacity-60">▼</span>
+                      </span>
+                      <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-1.5 rounded-xl lg:shadow-xl mt-0.5 min-w-[180px] z-50 space-y-0.5 border border-white/5 bg-[var(--primary)]/90 lg:bg-[var(--focus)]">
+                          <li><a href="#" class="block px-3 py-2 hover:bg-[var(--primary)] rounded-lg transition-colors font-medium">Consultar Clima</a></li>
+                      </ul>
+                  </li>
 
-              <li class="group relative">
-                  <span class="cursor-pointer font-semibold block lg:inline py-1">Consulta ▾</span>
-                  <ul class="lg:absolute hidden group-hover:block lg:bg-[var(--focus)] p-2 rounded pl-4 lg:pl-2 mt-1 space-y-1 z-50">
-                      <li><a href="#" class="block whitespace-nowrap px-2 py-1 hover:bg-[var(--primary)] rounded">Consultar Clima</a></li>
-                  </ul>
-              </li>
-
+              {% endif %}
           {% endif %}
-      {% endif %}
-    </ul>
+        </ul>
 
-    <hr class="border-gray-500 my-4 lg:hidden">
+        <hr class="border-white/10 my-4 lg:hidden">
 
-    <ul class="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 items-start lg:items-center">
-      {% if user.is_authenticated %}
-          <li class="text-sm font-bold order-first lg:order-none mb-2 lg:mb-0 bg-[var(--focus)] lg:bg-transparent px-2 py-1 rounded">
-              👤 {{ user.username }}
-          </li>
-          <li><a href="{% url 'bienvenida' %}" class="hover:underline block py-1">Inicio</a></li>
-          <li><a href="{% url 'password_change' %}" class="hover:underline block py-1">Contraseña</a></li>
-          <li><a href="{% url 'logout' %}" class="hover:underline block py-1 bg-red-700 lg:bg-transparent px-3 lg:px-0 py-1.5 lg:py-0 rounded text-center w-full">Salir</a></li>
-      {% endif %}
-    </ul>
+        <ul class="flex flex-col space-y-2 lg:space-y-0 lg:flex-row lg:space-x-2 items-stretch lg:items-center w-full lg:w-auto text-sm">
+          {% if user.is_authenticated %}
+              <li class="font-bold bg-[var(--focus)]/50 border border-white/10 rounded-lg px-3 py-2 lg:py-1.5 flex items-center gap-1.5 mb-2 lg:mb-0">
+                  <span class="text-xs">👤</span> {{ user.username }}
+              </li>
+              <li><a href="{% url 'bienvenida' %}" class="block px-3 py-2 hover:bg-[var(--focus)] lg:hover:bg-transparent lg:hover:underline rounded-lg transition-colors font-medium">Inicio</a></li>
+              <li><a href="{% url 'password_change' %}" class="block px-3 py-2 hover:bg-[var(--focus)] lg:hover:bg-transparent lg:hover:underline rounded-lg transition-colors font-medium">Contraseña</a></li>
+              <li>
+                <a href="{% url 'logout' %}" 
+                   class="block w-full text-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg lg:bg-transparent lg:text-red-300 lg:hover:text-red-200 lg:p-0 transition-colors">
+                  Salir
+                </a>
+              </li>
+          {% endif %}
+        </ul>
 
+      </div>
+    </div>
   </div>
 </nav>
 
-<div id="menu-overlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden transition-opacity duration-300"></div>
+<div id="menu-overlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 hidden transition-opacity duration-300"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -95,21 +123,23 @@
         const overlay = document.getElementById('menu-overlay');
 
         function toggleMenu() {
-            // Intercambia la clase de traducción para mostrar/ocultar el menú lateral
             sidebar.classList.toggle('-translate-x-full');
-            // Muestra u oculta la capa oscura de fondo
             overlay.classList.toggle('hidden');
+            // Bloquea el scroll del body de fondo al abrir el menú móvil
+            document.body.classList.toggle('overflow-hidden');
         }
 
         openBtn.addEventListener('click', toggleMenu);
         closeBtn.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu); // Cerrar también si se hace clic fuera del menú
+        overlay.addEventListener('click', toggleMenu);
     });
 </script>
 {% endblock %}
 
 {% block content %}
-<div class="mt-6">
-    {% block dashboard_content %}{% endblock %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="animate-fade-in">
+        {% block dashboard_content %}{% endblock %}
+    </div>
 </div>
 {% endblock %}
