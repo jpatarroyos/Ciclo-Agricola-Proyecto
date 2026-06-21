@@ -13,9 +13,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),    
     path("bienvenida/", views.bienvenida, name="bienvenida"),    
-        
-    path('crear-usuario/', views.crear_usuario, name='crear_usuario'),
 
+    path('crear-usuario/', views.crear_usuario, name='crear_usuario'),
+    path("crear_zonaagricola/", views.crear_zonaagricola, name="crear_zonaagricola"),   
 ]
 # pahth ("", views.funcion, name = "")
 
