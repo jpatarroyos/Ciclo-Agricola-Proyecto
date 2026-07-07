@@ -1,0 +1,73 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Menu Crear Zona Agricolas{% endblock %}
+
+{% block dashboard_content %}
+<h2 class="text-xl font-bold mb-4 text-[var(--focus)]">Zona agrícolas existentes</h2>
+<table class="w-full bg-white shadow rounded">
+    <tr><th>Nombre</th><th>Ubicación</th><th>Dirección</th><th>Acciones</th></tr>
+    {% for zona in zonas %}
+    <tr>
+        <td>{{ zona.nombre }}</td>
+        <td>{{ zona.ubicacion }}</td>
+        <td>{{ zona.direccion }}</td>
+        <td>
+            <button type="button"
+                    onclick="document.getElementById('modalEditar{{ zona.pk }}').classList.remove('hidden')"
+                    class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1 rounded">
+                Editar
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Botón Crear -->
+<div class="mt-4">
+    <button type="button"
+            onclick="document.getElementById('modalCrear').classList.remove('hidden')"
+            class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-4 py-2 rounded">
+        Crear Zona Agrícola
+    </button>
+</div>
+
+<!-- Modal Crear -->
+<div id="modalCrear" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Crear Zona Agrícola</h2>
+    <form method="post">
+      {% csrf_token %}
+      <strong>Nombre:</strong>
+      <input type="text" name="nombre" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Ubicación:</strong>
+      <input type="text" name="ubicacion" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Dirección:</strong>
+      <input type="text" name="direccion" class="border rounded px-3 py-2 w-full mb-2" required>
+      <button type="submit" name="crear_zonaagricola" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar</button>
+      <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar (uno por zona) -->
+{% for zona in zonas %}
+<div id="modalEditar{{ zona.pk }}" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+    <h2 class="text-xl font-bold mb-4">Editar Zona Agrícola</h2>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="zona_id" value="{{ zona.pk }}">
+      <strong>Nombre:</strong>
+      <input type="text" name="nombre" value="{{ zona.nombre }}" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Ubicación:</strong>
+      <input type="text" name="ubicacion" value="{{ zona.ubicacion }}" class="border rounded px-3 py-2 w-full mb-2" required>
+      <strong>Dirección:</strong>
+      <input type="text" name="direccion" value="{{ zona.direccion }}" class="border rounded px-3 py-2 w-full mb-2" required>
+      <button type="submit" name="editar_zonaagricola" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar cambios</button>
+      <button type="button" onclick="document.getElementById('modalEditar{{ zona.pk }}').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

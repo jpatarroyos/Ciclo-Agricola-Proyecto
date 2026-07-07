@@ -1,0 +1,192 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Menú Crear Usuarios{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-6xl mx-auto p-4">
+    
+    <!-- Encabezado de sección y botón de acción alineados -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-[var(--primary)]">Usuarios Existentes</h2>
+            <p class="text-sm text-gray-500 mt-1">Gestión y control de accesos a la plataforma AgroPlan</p>
+        </div>
+        <button type="button"
+                onclick="document.getElementById('modalCrear').classList.remove('hidden')"
+                class="inline-flex items-center justify-center gap-2 bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-200 cursor-pointer text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Crear Usuario
+        </button>
+    </div>
+
+    <!-- Tabla Responsive -->
+    <div class="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-3.5">Nombre</th>
+                        <th class="px-6 py-3.5">Email</th>
+                        <th class="px-6 py-3.5">Grupo</th>
+                        <th class="px-6 py-3.5 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    {% for usuario in usuarios %}
+                    <tr class="hover:bg-gray-50/70 transition-colors duration-150">
+                        <td class="px-6 py-4 font-medium text-gray-900">{{ usuario.username }}</td>
+                        <td class="px-6 py-4 text-gray-500">{{ usuario.email }}</td>
+                        <td class="px-6 py-4">
+                            {% if usuario.groups.all %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                    {{ usuario.groups.first.name }}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    Sin grupo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <button type="button"
+                                    onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.remove('hidden')"
+                                    class="inline-flex items-center bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm transition-colors cursor-pointer">
+                                Editar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Crear -->
+<div id="modalCrear" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-gray-900">Crear Usuario</h2>
+        <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <form method="post" onsubmit="return validar_crear(this)" class="p-6 space-y-4">
+      {% csrf_token %}  
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
+          <input type="text" name="username" placeholder="Ej. juan.perez" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
+          <input type="email" name="email" placeholder="correo@agroplan.com" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Clave:</label>
+          <input type="password" name="password" placeholder="••••••••" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
+          <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <option value="Administrador">Administrador</option>
+            <option value="Vendedor">Vendedor</option>
+            <option value="Veterinario">Veterinario</option>
+          </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+          <button type="submit" name="crear_usuario" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Editar (uno por usuario) -->
+{% for usuario in usuarios %}
+<div id="modalEditar{{ usuario.id }}" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-gray-900">Editar Usuario</h2>
+        <button type="button" onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <form method="post" onsubmit="return validar_editar(this)" class="p-6 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
+          <input type="text" value="{{ usuario.username }}" disabled class="border border-gray-200 bg-gray-50 text-gray-500 rounded-lg px-3 py-2 w-full text-sm cursor-not-allowed">
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
+          <input type="email" name="email" value="{{ usuario.email }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
+          <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <option value="Administrador" {% if usuario.groups.first.name == "Administrador" %}selected{% endif %}>Administrador</option>
+            <option value="Vendedor" {% if usuario.groups.first.name == "Vendedor" %}selected{% endif %}>Vendedor</option>
+            <option value="Veterinario" {% if usuario.groups.first.name == "Veterinario" %}selected{% endif %}>Veterinario</option>
+          </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+          <button type="submit" name="editar_usuario" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+function validar_crear(form) {
+  const username = form.username.value.trim();
+  const email = form.email.value.trim();
+  const password = form.password.value.trim();
+  const group = form.group.value.trim();
+
+  if (!username || !email || !password || !group) {
+    alert("Todos los campos son obligatorios");
+    return false;
+  }
+
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexEmail.test(email)) {
+    alert("El correo electrónico no es válido");
+    return false;
+  }
+
+  if (password.length < 6) {
+    alert("La contraseña debe tener al menos 6 caracteres");
+    return false;
+  }
+
+  return true;
+}
+
+function validar_editar(form) {
+  const email = form.email.value.trim();
+  const group = form.group.value.trim();
+
+  if (!email || !group) {
+    alert("El email y el grupo son obligatorios");
+    return false;
+  }
+
+  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!regexEmail.test(email)) {
+    alert("El correo electrónico no es válido");
+    return false;
+  }
+
+  return true;
+}
+</script>
+{% endblock %}
