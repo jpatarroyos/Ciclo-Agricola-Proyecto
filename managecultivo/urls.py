@@ -22,6 +22,8 @@ urlpatterns = [
     path("crear_personal/", views.v_personal.crear_personal, name="crear_personal"),
     # Vista auxiliar: devolver datos en JSON para el modal, solo se usa en el boton editar
     path("persona/<int:id>/", views.v_personal.persona_detalle, name="persona_detalle"),
+
+    path("compra_insumos/", views.gestionar_insumos, name="compra_insumos"),
 ]
 # pahth ("", views.funcion, name = "")
 
