@@ -3,3 +3,4 @@ from .v_zonaagricola import crear_zonaagricola
 from .v_usuario import crear_usuario
 from .v_personal import crear_personal
 from .v_clima import clima
+from .v_compra_insumos import gestionar_insumos

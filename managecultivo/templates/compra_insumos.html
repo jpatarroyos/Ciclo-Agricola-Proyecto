@@ -1,0 +1,226 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Menú compra de insumos{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-6xl mx-auto p-4 space-y-6">
+    
+    <div>
+        <h2 class="text-2xl font-bold text-[var(--primary)]">Registrar Compra de Insumos</h2>
+        <p class="text-sm text-gray-500 mt-1">Monitorea los insumos adquiridos y su distribución en los ciclos agrícolas activos</p>
+    </div>
+
+    {% if messages %}
+      <div class="space-y-2">
+        {% for message in messages %}
+          <div class="p-4 rounded-xl text-sm font-medium border shadow-sm transition-all animate-fade-in
+                      {% if message.tags == 'error' %} bg-red-50 text-red-800 border-red-200 
+                      {% elif message.tags == 'success' %} bg-green-50 text-green-800 border-green-200 
+                      {% else %} bg-blue-50 text-blue-800 border-blue-200 {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm max-w-xl">
+        <form method="GET" action="">
+          <div class="flex flex-col space-y-2">
+            <label for="insumo" class="text-xs font-bold uppercase text-gray-600">Seleccionar Insumo:</label>
+            <div class="relative">
+                <select id="insumo" name="insumo" required onchange="this.form.submit()"
+                        class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer text-gray-700">
+                  <option value="" disabled selected>-- Seleccione un insumo --</option>
+                  {% for insumo in insumos %}
+                    <option value="{{ insumo.id_insumo }}"
+                      {% if insumo.id_insumo|stringformat:"s" == request.GET.insumo %}selected{% endif %}>
+                      {{ insumo.descripcion }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+          </div>
+        </form>
+    </div>
+
+    {% if insumo_id %}
+        
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+            <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Compras Realizadas</p>
+                <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ total_compras }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+            <div class="p-3 bg-green-50 rounded-lg text-green-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Utilizado</p>
+                <p class="text-xl font-extrabold text-gray-900 mt-0.5">{{ total_utilizado }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gray-50/70 px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h3 class="font-bold text-gray-800 text-lg">Historial de Compras</h3>
+            <button type="button"
+                    onclick="document.getElementById('modalCrearCompra').classList.remove('hidden')"
+                    class="inline-flex items-center justify-center gap-1.5 bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-xs shadow-sm transition-colors cursor-pointer w-full sm:w-auto">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Registrar Compra
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        <th class="px-6 py-3.5">Fecha</th>
+                        <th class="px-6 py-3.5">Marca</th>
+                        <th class="px-6 py-3.5">Cantidad</th>
+                        <th class="px-6 py-3.5">Registrado por</th>
+                        <th class="px-6 py-3.5 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    {% for compra in compras %}
+                    <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">{{ compra.fecha_compra }}</td>
+                        <td class="px-6 py-4 font-medium text-gray-900">{{ compra.marca }}</td>
+                        <td class="px-6 py-4 font-semibold text-gray-900">{{ compra.cantidad }}</td>
+                        <td class="px-6 py-4 text-gray-500">{{ compra.registrado_por }}</td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                            <button type="button"
+                                    onclick="document.getElementById('modalEditarCompra{{ compra.id }}').classList.remove('hidden')"
+                                    class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm transition-colors cursor-pointer">
+                                Editar
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-400 text-sm">No hay compras registradas para este insumo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gray-50/70 px-6 py-4 border-b border-gray-200">
+            <h3 class="font-bold text-gray-800 text-lg">Cantidades Utilizadas en Campo</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        <th class="px-6 py-3.5 text-center">Nº Ciclo</th>
+                        <th class="px-6 py-3.5">Fecha</th>
+                        <th class="px-6 py-3.5">Cultivo</th>
+                        <th class="px-6 py-3.5">Actividad</th>
+                        <th class="px-6 py-3.5 text-center">Cantidad Utilizada</th>
+                        <th class="px-6 py-3.5">Registrado por</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    {% for act in actividades %}
+                    <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                        <td class="px-6 py-4 text-center font-bold text-gray-900">{{ act.actividad_ciclo.id_ciclo.id_ciclo }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ act.actividad_ciclo.fecha_programada }}</td>
+                        <td class="px-6 py-4 font-medium text-gray-900">{{ act.actividad_ciclo.id_ciclo.id_cultivo.descripcion }}</td>
+                        <td class="px-6 py-4 text-gray-600">{{ act.actividad_ciclo.id_actividad.descripcion }}</td>
+                        <td class="px-6 py-4 text-center font-semibold text-green-600 bg-green-50/40">{{ act.cantidad_utilizada }}</td>
+                        <td class="px-6 py-4 text-gray-500">{{ act.registrado_por }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-400 text-sm">No hay cantidades registradas para este insumo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div id="modalCrearCompra" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-gray-900">Registrar Compra</h2>
+        <button type="button" onclick="document.getElementById('modalCrearCompra').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <form method="post" class="p-6 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="insumo_id" value="{{ insumo_id }}">
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha de compra:</label>
+          <input type="date" name="fecha_compra" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required max="{{ today }}" value="{{ today }}">
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Marca:</label>
+          <input type="text" name="marca" placeholder="Ej. FertiMax" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Cantidad:</label>
+          <input type="number" step="0.01" name="cantidad" placeholder="0.00" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+      
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('modalCrearCompra').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+          <button type="submit" name="crear_compra" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% for compra in compras %}
+<div id="modalEditarCompra{{ compra.id }}" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-gray-900">Editar Compra</h2>
+        <button type="button" onclick="document.getElementById('modalEditarCompra{{ compra.id }}').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <form method="post" class="p-6 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="compra_id" value="{{ compra.id }}">
+
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Fecha de compra:</label>
+          <input type="date" name="fecha_compra" value="{{ compra.fecha_compra|date:'Y-m-d' }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required max="{{ today }}">
+      </div>
+
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Marca:</label>
+          <input type="text" name="marca" value="{{ compra.marca }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+
+      <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Cantidad:</label>
+          <input type="number" step="0.01" name="cantidad" value="{{ compra.cantidad }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+          <button type="button" onclick="document.getElementById('modalEditarCompra{{ compra.id }}').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+          <button type="submit" name="editar_compra" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
