@@ -31,12 +31,14 @@ urlpatterns = [
     path("crear_insumo/", views.crear_insumo, name="crear_insumo"),
     path("crear_actividadcultivo/", views.crear_actividadcultivo, name="crear_actividadcultivo"),
     path("borrar_actividadcultivo/<int:pk>/", views.borrar_actividadcultivo, name="borrar_actividadcultivo"),
-   
+    path("crear_ciclo/", views.crear_ciclo, name="crear_ciclo"),
     path("compra_insumos/", views.gestionar_insumos, name="compra_insumos"),
-
     path("clima/", views.clima, name="clima"),
     path("mover_arriba/<int:pk>/", views.mover_arriba, name="mover_arriba"),
     path("mover_abajo/<int:pk>/", views.mover_abajo, name="mover_abajo"),   
+     # lo de ciclos 
+    path("ajustar_ciclo/<int:ciclo_id>/", views.ajustar_ciclo, name="ajustar_ciclo"),  
+
 ]
 # pahth ("", views.funcion, name = "")
 
