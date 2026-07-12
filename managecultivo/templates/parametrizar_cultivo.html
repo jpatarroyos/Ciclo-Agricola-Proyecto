@@ -26,6 +26,7 @@
   <form method="post" action="{% url 'crear_actividadcultivo' %}" class="space-y-6">
     {% csrf_token %}
 
+    <!-- Selector de Cultivo -->
     <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
         <button type="button" onclick="document.getElementById('modalCrearCultivo').classList.remove('hidden')"
@@ -50,92 +51,25 @@
         </div>
         {% endif %}
       </div>
-     
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {% if actividades %}
-      <div class="lg:col-span-7 bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
-      
-        <h3 class="text-lg font-bold text-gray-800 text-center sm:text-left">Actividades programadas para Cultivo <span style="color: var(--celdanor);">{{ cultivo_seleccionado }}</span></h3>
-        <div class="overflow-x-auto w-full border border-gray-200 rounded-lg">
-          <table class="w-full text-sm text-left text-gray-500 min-w-[900px]">
-            <thead class="text-xs text-blue-800 uppercase bg-blue-50 border-b">
-              <tr>
-                <th scope="col" class="px-4 py-3">Actividad</th>
-                <th scope="col" class="px-4 py-3 text-center">Color</th>
-                <th scope="col" class="px-4 py-3 text-center">Día Inicio</th>
-                <th scope="col" class="px-4 py-3 text-center">Frecuencia</th>
-                <th scope="col" class="px-4 py-3 text-center">Rango Personal</th>
-                <th scope="col" class="px-4 py-3">Insumos Requeridos</th>
-                <th scope="col" class="px-4 py-3 text-center">Personal</th>
-                <th scope="col" class="px-4 py-3 text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              {% for act in actividades %}
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 font-semibold text-gray-900">{{ act.id_actividad.descripcion }}</td>
-                <td class="px-4 py-3 text-center">
-                  <div class="flex flex-col items-center justify-center gap-1">
-                    <span class="inline-block w-6 h-6 rounded-md shadow-inner border border-gray-300" style="background-color: {{ act.color }}"></span>
-                    <span class="text-[10px] text-gray-400 font-mono">{{ act.color }}</span>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-center font-medium">{{ act.dia_inicio }}</td>
-                <td class="px-4 py-3 text-center"><span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded">{{ act.frecuencia.descripcion }}</span></td>
-                <td class="px-4 py-3 text-center text-xs">
-                  <span class="font-medium text-gray-700">Min: {{ act.min_personas }}</span> / 
-                  <span class="font-medium text-gray-700">Max: {{ act.max_personas }}</span>
-                </td>
-                <td class="px-4 py-3 text-xs leading-relaxed">
-                  {% for insumo in act.fk_CultivoActividadInsumo1.all %}
-                  <div class="flex items-center gap-1 mb-0.5">
-                    <span class="text-blue-500">•</span>
-                    <span>{{ insumo.id_insumo.descripcion }} <strong class="text-gray-700">({{ insumo.cantidad_sugerida }})</strong></span>
-                  </div>
-                  {% empty %}
-                  <span class="text-gray-400 italic">- Sin insumos -</span>
-                  {% endfor %}
-                </td>
-                <td class="px-4 py-3 text-xs leading-relaxed">
-                  {% for personal in act.fk_CultivoActividadPersonal_Base.all %}
-                  <div class="flex items-center gap-1 mb-0.5">
-                    <span class="text-blue-500">•</span>
-                    <span>{{ personal.id_personal.nombre }} <strong class="text-gray-700">({{ personal.id_personal.rol }})</strong></span>
-                  </div>
-                  {% empty %}
-                  <span class="text-gray-400 italic">- Sin personal -</span>
-                  {% endfor %}
-
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <form method="post" action="{% url 'borrar_actividadcultivo' act.pk %}" onsubmit="return confirm('¿Está seguro de borrar esta actividad?');">
-                    {% csrf_token %}
-                    <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 transition-colors">
-                      Borrar
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+    <!-- SECCIÓN 1: Gestión de Actividad (Formulario Horizontal) -->
+    <div class="bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+      <div class="text-blue-600 font-bold text-base mb-4 flex items-center border-b border-blue-100 pb-2">
+        <span class="mr-2">🚜</span> Agregar Actividad al Cultivo
       </div>
-      {% endif %}
 
-      <div class="lg:col-span-5 bg-white border border-blue-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="text-blue-600 font-bold text-base mb-4 flex items-center border-b border-blue-100 pb-2">
-            <span class="mr-2">🚜</span> Agregar Actividad al Cultivo
-          </div>
-
-          <div class="mb-4 space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Actividad:</label>
-            <div class="flex flex-col sm:flex-row gap-2">
+      <!-- Contenedor flex horizontal responsivo para todos los campos principales -->
+      <div class="flex flex-col xl:flex-row gap-4 items-start xl:justify-evenly xl:items-stretch lg:items-stretch">
+        
+        <div class="flex flex-col lg:flex-row xl:flex-col gap-4 items-start lg:items-stretch lg:justify-evenly xl:items-start">
+          <!-- Bloque Actividad y Día Inicio -->
+        <div class="w-full space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Actividad:</label>
+            <div class="flex gap-2">
               <select id="actividad" name="id_actividad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-                <option value="" disabled selected>-- Seleccione una actividad --</option>
+                <option value="" disabled selected>-- Actividad --</option>
                 {% for actividad in actividades_lista %}
                 <option value="{{ actividad.id_actividad }}">
                   {{ actividad.descripcion }} - {{ actividad.get_prioridad_display }}
@@ -143,19 +77,20 @@
                 {% endfor %}
               </select>
               <button type="button" onclick="document.getElementById('modalCrearActividad').classList.remove('hidden')"
-                      class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] text-sm px-3 py-2 rounded-lg transition-colors shrink-0">
+                      class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] text-sm px-3 py-2 rounded-lg transition-colors shrink-0">
                 Nueva
               </button>
             </div>
           </div>
           <div class="flex items-center space-x-2">
-            <label for="dia_inicio" class="text-sm font-medium text-gray-700">Día inicio:</label>
-            <input type="number" id="dia_inicio" name="dia_inicio" 
-                  class="bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+            <label for="dia_inicio" class="text-sm font-medium text-gray-700 shrink-0">Día inicio:</label>
+            <input type="number" id="dia_inicio" name="dia_inicio" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
           </div>
+        </div>
 
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <!-- Bloque Frecuencia, Color y Personal numérico -->
+        <div class="w-full space-y-3">
+          <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Frecuencia:</label>
               <select name="frecuencia" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm">
@@ -165,86 +100,159 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Color Identificador:</label>
-              <div class="flex items-center gap-2">
-                <input type="color" name="color" class="border border-gray-300 rounded-lg w-12 h-9 p-1 bg-white cursor-pointer" value="#579DA2">
-                <span class="text-xs text-gray-500">Paleta calendario</span>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Color:</label>
+              <div class="flex items-center gap-1">
+                <input type="color" name="color" class="border border-gray-300 rounded-lg w-10 h-9 p-1 bg-white cursor-pointer" value="#579DA2">
+                <span class="text-[10px] text-gray-500 leading-tight">Paleta</span>
               </div>
             </div>
           </div>
-
-          <div class="mb-4">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Personal requerido:</label>
             <div class="grid grid-cols-2 gap-2">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1">
                 <span class="text-xs text-gray-500 shrink-0">Mín</span>
                 <input type="number" name="min_personas" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1">
                 <span class="text-xs text-gray-500 shrink-0">Máx</span>
                 <input type="number" name="max_personas" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
               </div>
             </div>
           </div>
+        </div>
+        </div>
 
-          <div class="mb-3 space-y-2">
-            <div class="flex justify-between items-center">
-              <label class="text-sm font-medium text-gray-700">Insumos asociados:</label>
-              <button type="button" onclick="document.getElementById('modalCrearInsumo').classList.remove('hidden')"
-                      class="text-xs text-[var(--primary)] hover:underline font-semibold">
-                + Crear Insumo
-              </button>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-2 h-40 overflow-y-auto bg-gray-50 space-y-2">
-              {% for insumo in insumos %}
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm gap-2">
-                <label class="flex items-center text-xs font-medium text-gray-700 cursor-pointer">
-                  <input type="checkbox" name="insumos" value="{{ insumo.id_insumo }}" class="w-4 h-4 rounded text-blue-600 mr-2">
-                  <span>{{ insumo.descripcion }}</span>
-                </label>
-                <div class="flex items-center gap-2 self-end sm:self-auto">
-                  <span class="text-[10px] text-gray-400">Cant. sugerida:</span>
-                  <input type="number" step="0.01" name="cantidad_{{ insumo.id_insumo }}" 
-                         class="border border-gray-300 rounded p-1 w-20 text-xs text-center" value="0">
-                </div>
-              </div>
-              {% endfor %}
-            </div>
+        <!-- Bloque Insumos Asociados -->
+        <div class="w-full xl:w-1/4 flex flex-col">
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-sm font-medium text-gray-700">Insumos asociados:</label>
+            <button type="button" onclick="document.getElementById('modalCrearInsumo').classList.remove('hidden')"
+                    class="text-xs text-[var(--primary)] hover:underline font-semibold">
+              + Crear Insumo
+            </button>
           </div>
-
-          <div class="mb-4 space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Personal Encargado Asignado:</label>
-            <div class="border border-gray-200 rounded-lg p-2 h-36 overflow-y-auto bg-gray-50 space-y-2">
-              {% for persona in personal_lista %}
-              <label class="flex items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm cursor-pointer hover:bg-gray-50">
-                <div class="flex items-center text-xs text-gray-700">
-                  <input type="checkbox" name="personal_encargado" value="{{ persona.id_cedula }}" class="w-4 h-4 rounded text-blue-600 mr-2">
-                  <span class="font-medium">{{ persona.nombre }}</span>
-                </div>
-                <span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-semibold">
-                  {{ persona.rol }}
-                </span>
+          <div class="border border-gray-200 rounded-lg p-2 h-28 overflow-y-auto bg-gray-50 space-y-2 flex-grow">
+            {% for insumo in insumos %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm gap-1">
+              <label class="flex items-center text-xs font-medium text-gray-700 cursor-pointer">
+                <input type="checkbox" name="insumos" value="{{ insumo.id_insumo }}" class="w-4 h-4 rounded text-blue-600 mr-1.5">
+                <span>{{ insumo.descripcion }}</span>
               </label>
-              {% empty %}
-              <p class="text-xs text-gray-400 italic p-2 text-center">No hay personal registrado.</p>
-              {% endfor %}
+              <div class="flex items-center gap-1 self-end sm:self-auto">
+                <span class="text-[9px] text-gray-400">Sugerida:</span>
+                <input type="number" step="0.01" name="cantidad_{{ insumo.id_insumo }}" class="border border-gray-300 rounded p-0.5 w-14 text-xs text-center" value="0">
+              </div>
             </div>
+            {% endfor %}
           </div>
         </div>
 
-        <div class="mt-4 pt-3 border-t">
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition-colors text-sm text-center">
-            💾 Guardar y Agregar Actividad
-          </button>
+        <!-- Bloque Personal Encargado Asignado -->
+        <div class="w-full xl:w-1/4 flex flex-col">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Personal Encargado Asignado:</label>
+          <div class="border border-gray-200 rounded-lg p-2 h-28 overflow-y-auto bg-gray-50 space-y-1.5 flex-grow">
+            {% for persona in personal_lista %}
+            <label class="flex items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm cursor-pointer hover:bg-gray-50">
+              <div class="flex items-center text-xs text-gray-700">
+                <input type="checkbox" name="personal_encargado" value="{{ persona.id_cedula }}" class="w-4 h-4 rounded text-blue-600 mr-1.5">
+                <span class="font-medium">{{ persona.nombre }}</span>
+              </div>
+              <span class="text-[9px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full font-semibold">
+                {{ persona.rol }}
+              </span>
+            </label>
+            {% empty %}
+            <p class="text-xs text-gray-400 italic p-2 text-center">No hay personal registrado.</p>
+            {% endfor %}
+          </div>
         </div>
+
+      </div>
+
+      <!-- Botón de Guardar en la parte inferior del bloque horizontal -->
+      <div class="mt-4 pt-3 border-t flex justify-end">
+        <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition-colors text-sm text-center">
+          💾 Guardar y Agregar Actividad
+        </button>
       </div>
     </div>
   </form>
 
-  <!-- planeacion-->
-  <div class="lg:col-span-7 bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
+  <!-- SECCIÓN 2: Actividades Programadas (Ancho completo) -->
+  {% if actividades %}
+  <div class="w-full bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
+    <h3 class="text-lg font-bold text-gray-800 text-center sm:text-left mb-3">Actividades programadas para Cultivo <span style="color: var(--celdanor);">{{ cultivo_seleccionado }}</span></h3>
+    <div class="overflow-x-auto w-full border border-gray-200 rounded-lg">
+      <table class="w-full text-sm text-left text-gray-500 min-w-[900px]">
+        <thead class="text-xs text-blue-800 uppercase bg-blue-50 border-b">
+          <tr>
+            <th scope="col" class="px-4 py-3">Actividad</th>
+            <th scope="col" class="px-4 py-3 text-center">Color</th>
+            <th scope="col" class="px-4 py-3 text-center">Día Inicio</th>
+            <th scope="col" class="px-4 py-3 text-center">Frecuencia</th>
+            <th scope="col" class="px-4 py-3 text-center">Rango Personal</th>
+            <th scope="col" class="px-4 py-3">Insumos Requeridos</th>
+            <th scope="col" class="px-4 py-3 text-center">Personal</th>
+            <th scope="col" class="px-4 py-3 text-center">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          {% for act in actividades %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3 font-semibold text-gray-900">{{ act.id_actividad.descripcion }}</td>
+            <td class="px-4 py-3 text-center">
+              <div class="flex flex-col items-center justify-center gap-1">
+                <span class="inline-block w-6 h-6 rounded-md shadow-inner border border-gray-300" style="background-color: {{ act.color }}"></span>
+                <span class="text-[10px] text-gray-400 font-mono">{{ act.color }}</span>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center font-medium">{{ act.dia_inicio }}</td>
+            <td class="px-4 py-3 text-center"><span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded">{{ act.frecuencia.descripcion }}</span></td>
+            <td class="px-4 py-3 text-center text-xs">
+              <span class="font-medium text-gray-700">Min: {{ act.min_personas }}</span> / 
+              <span class="font-medium text-gray-700">Max: {{ act.max_personas }}</span>
+            </td>
+            <td class="px-4 py-3 text-xs leading-relaxed">
+              {% for insumo in act.fk_CultivoActividadInsumo1.all %}
+              <div class="flex items-center gap-1 mb-0.5">
+                <span class="text-blue-500">•</span>
+                <span>{{ insumo.id_insumo.descripcion }} <strong class="text-gray-700">({{ insumo.cantidad_sugerida }})</strong></span>
+              </div>
+              {% empty %}
+              <span class="text-gray-400 italic">- Sin insumos -</span>
+              {% endfor %}
+            </td>
+            <td class="px-4 py-3 text-xs leading-relaxed">
+              {% for personal in act.fk_CultivoActividadPersonal_Base.all %}
+              <div class="flex items-center gap-1 mb-0.5">
+                <span class="text-blue-500">•</span>
+                <span>{{ personal.id_personal.nombre }} <strong class="text-gray-700">({{ personal.id_personal.rol }})</strong></span>
+              </div>
+              {% empty %}
+              <span class="text-gray-400 italic">- Sin personal -</span>
+              {% endfor %}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <form method="post" action="{% url 'borrar_actividadcultivo' act.pk %}" onsubmit="return confirm('¿Está seguro de borrar esta actividad?');">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 transition-colors">
+                  Borrar
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- SECCIÓN 3: Planeación Semanal / Calendario (Ancho completo) -->
+  <div class="w-full bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
     <div class="text-green-600 font-bold text-base mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-green-100 pb-2">
-      <span class="flex items-center"><span class="mr-2">📅</span> Planeación Semanal {{cultivo_seleccionado}} (cada 7 dias))</span>
+      <span class="flex items-center"><span class="mr-2">📅</span> Planeación Semanal {{cultivo_seleccionado}} (cada 7 días)</span>
       <div class="flex gap-2">
         {% if semana_actual > 1 %}
         <a href="?cultivo={{ cultivo_seleccionado.id_cultivo }}&semana={{ semana_actual|add:"-1" }}"
@@ -262,7 +270,8 @@
     </div>
 
     <div class="w-full overflow-x-auto">
-      <div class="min-w-[600px]"> <table class="w-full table-fixed border-collapse border border-gray-200">
+      <div class="min-w-[600px]"> 
+        <table class="w-full table-fixed border-collapse border border-gray-200">
           <thead>
             <tr class="bg-green-50">
               <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 1</th>
@@ -302,8 +311,10 @@
       </div>
     </div>
   </div>
+
 </div>
 
+<!-- MODALES (Permanecen intactos abajo para no interferir en el flujo visual principal) -->
 <div id="modalCrearCultivo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
   <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all">
     <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌱 Crear Nuevo Cultivo</h3>
