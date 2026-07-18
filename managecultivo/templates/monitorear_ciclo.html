@@ -1,0 +1,128 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Monitoreo de Ciclos{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-2 sm:p-4 max-w-6xl mx-auto space-y-6">
+
+  <div class="border-b border-gray-100 pb-3">
+    <h2 class="text-xl sm:text-2xl font-bold text-[var(--focus)] tracking-tight">🔍 Monitoreo de Ciclos</h2>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Consulte o registre el historial de observaciones y estados de los cultivos en desarrollo.</p>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <form method="get" class="flex flex-col sm:flex-row items-end gap-3">
+      <div class="w-full flex-1">
+        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Seleccionar Ciclo Operativo:</label>
+        <select name="ciclo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm transition-all focus:border-[var(--focus)] focus:bg-white" required>
+          <option value="">-- Busque y seleccione un cultivo, zona o fecha --</option>
+          {% for ciclo in ciclos %}
+            <option value="{{ ciclo.id_ciclo }}" {% if ciclo.id_ciclo|stringformat:"s" == ciclo_id %}selected{% endif %}>
+              Cultivo: {{ ciclo.id_cultivo.descripcion }} | Zona: {{ ciclo.id_zonaagricola.nombre }} | 
+              Inicio: {{ ciclo.fecha_inicio|date:"d/m/Y" }} | Fin: {{ ciclo.fecha_fin|date:"d/m/Y" }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors cursor-pointer shrink-0 shadow-xs">
+        Consultar Bitácora
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="p-4 bg-gray-50/70 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <span class="text-sm font-bold text-gray-700">Registros Encontrados</span>
+      
+      {% if ciclo_id %}
+      <button type="button"
+              onclick="document.getElementById('modalCrear').classList.remove('hidden')"
+              class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-colors shadow-2xs flex items-center justify-center gap-1.5">
+        <span>➕</span> Agregar Monitoreo
+      </button>
+      {% endif %}
+    </div>
+
+    <div class="overflow-x-auto w-full">
+      <table class="w-full text-sm text-left text-gray-500 min-w-[600px]">
+        <thead class="text-xs text-blue-900 uppercase bg-blue-50/60 border-b border-gray-200">
+          <tr>
+            <th scope="col" class="px-5 py-3 text-center w-36">Fecha</th>
+            <th scope="col" class="px-5 py-3">Observación Técnica</th>
+            <th scope="col" class="px-5 py-3 w-48">Registrado Por</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          {% for monitoreo in monitoreos %}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="px-5 py-3.5 text-center font-semibold text-gray-700 bg-gray-50/30">
+                <span class="inline-block bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs">
+                  📅 {{ monitoreo.fecha|date:"d/m/Y" }}
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-gray-800 whitespace-pre-line leading-relaxed">
+                {{ monitoreo.observacion }}
+              </td>
+              <td class="px-5 py-3.5 text-gray-600 font-medium">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold uppercase">
+                    {{ monitoreo.registrado_por|slice:":2" }}
+                  </div>
+                  <span class="truncate">{{ monitoreo.registrado_por }}</span>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="text-center py-10 text-gray-400 italic bg-gray-50/30">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                  <span class="text-3xl">📭</span>
+                  <span class="text-sm">No hay registros de monitoreo para el ciclo seleccionado o no ha realizado una consulta aún.</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="modalCrear" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
+    
+    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">📝 Nuevo Registro de Monitoreo</h3>
+    <p class="text-xs text-gray-400 mb-4">Ingrese los detalles observados en el campo el día de hoy.</p>
+    
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="ciclo_id" value="{{ ciclo_id }}">
+      
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Fecha de Registro:</label>
+        <input type="text" value="{{ fecha_hoy|date:'d/m/Y' }}" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-600 cursor-not-allowed">
+        <input type="hidden" name="fecha" value="{{ fecha_hoy|date:'Y-m-d' }}">
+      </div>
+      
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Observación / Reporte:</label>
+        <textarea name="observacion" rows="4" placeholder="Escriba los pormenores, incidencias o novedades fitosanitarias encontradas..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required></textarea>
+      </div>
+      
+      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+        <button type="button" 
+                onclick="document.getElementById('modalCrear').classList.add('hidden')" 
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" name="crear_monitoreo" 
+                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
+          Guardar Registro
+        </button>
+      </div>
+    </form>
+    
+  </div>
+</div>
+{% endblock %}
