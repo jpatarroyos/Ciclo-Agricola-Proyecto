@@ -39,6 +39,8 @@ urlpatterns = [
      # lo de ciclos 
     path("ajustar_ciclo/<int:ciclo_id>/", views.ajustar_ciclo, name="ajustar_ciclo"),  
 
+     # monitoriar
+    path("monitorear_ciclo/", views.ciclo_monitoreo, name="monitorear_ciclo"),
 ]
 # pahth ("", views.funcion, name = "")
 

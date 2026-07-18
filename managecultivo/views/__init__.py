@@ -8,3 +8,6 @@ from .v_crearciclo import crear_ciclo
 from .v_ajusteciclo import ajustar_ciclo
 from .v_compra_insumos import gestionar_insumos
 from .v_clima import clima
+
+
+from .v_monitorear_ciclo import ciclo_monitoreo
