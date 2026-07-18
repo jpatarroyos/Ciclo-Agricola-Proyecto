@@ -1,0 +1,455 @@
+{% extends "base_dashboard.html" %}
+
+{% block subnavbar_title %}Cultivo / Actividad / Insumo por hectárea{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="p-2 sm:p-4 max-w-7xl mx-auto space-y-6">
+  
+  <h2 class="text-xl sm:text-2xl font-bold text-[var(--focus)] border-b pb-2">
+    Configurar Cultivo - Actividad - Insumo (por Hectárea)
+  </h2>
+
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+    <div class="p-3 rounded-lg text-sm font-medium shadow-sm transition-all
+                {% if message.tags == 'success' %} bg-green-100 text-green-800 border border-green-200
+                {% elif message.tags == 'error' %} bg-red-100 text-red-800 border border-red-200
+                {% else %} bg-blue-100 text-blue-800 border border-blue-200 {% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'crear_actividadcultivo' %}" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Selector de Cultivo -->
+    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+        <button type="button" onclick="document.getElementById('modalCrearCultivo').classList.remove('hidden')"
+                class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors shrink-0">
+          + Crear Cultivo
+        </button>
+        <label for="cultivo" class="text-gray-700 font-semibold shrink-0">Cultivo:</label>
+        <select id="cultivo" name="id_cultivo" 
+                class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 text-sm" 
+                required onchange="window.location.href='?cultivo=' + this.value;">
+          <option value="" disabled selected>-- Seleccione un Cultivo --</option>
+          {% for cultivo in cultivos %}
+          <option value="{{ cultivo.id_cultivo }}" {% if cultivo.id_cultivo|stringformat:"s" == request.GET.cultivo %}selected{% endif %}>
+            {{ cultivo.descripcion }}
+          </option>
+          {% endfor %}
+        </select>
+        {% if cultivo_seleccionado %}
+        <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium border border-blue-100 flex items-center gap-2 self-start md:self-auto">
+          <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+          <strong>Tiempo agrícola:</strong> {{ cultivo_seleccionado.tiempo_agricola }} días
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: Gestión de Actividad (Formulario Horizontal) -->
+    <div class="bg-white border border-blue-200 rounded-xl p-4 shadow-sm">
+      <div class="text-blue-600 font-bold text-base mb-4 flex items-center border-b border-blue-100 pb-2">
+        <span class="mr-2">🚜</span> Agregar Actividad al Cultivo
+      </div>
+
+      <!-- Contenedor flex horizontal responsivo para todos los campos principales -->
+      <div class="flex flex-col xl:flex-row gap-4 items-start xl:justify-evenly xl:items-stretch lg:items-stretch">
+        
+        <div class="flex flex-col lg:flex-row xl:flex-col gap-4 items-start lg:items-stretch lg:justify-evenly xl:items-start">
+          <!-- Bloque Actividad y Día Inicio -->
+        <div class="w-full space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Actividad:</label>
+            <div class="flex gap-2">
+              <select id="actividad" name="id_actividad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+                <option value="" disabled selected>-- Actividad --</option>
+                {% for actividad in actividades_lista %}
+                <option value="{{ actividad.id_actividad }}">
+                  {{ actividad.descripcion }} - {{ actividad.get_prioridad_display }}
+                </option>
+                {% endfor %}
+              </select>
+              <button type="button" onclick="document.getElementById('modalCrearActividad').classList.remove('hidden')"
+                      class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] text-sm px-3 py-2 rounded-lg transition-colors shrink-0">
+                Nueva
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <label for="dia_inicio" class="text-sm font-medium text-gray-700 shrink-0">Día inicio:</label>
+            <input type="number" id="dia_inicio" name="dia_inicio" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+          </div>
+        </div>
+
+        <!-- Bloque Frecuencia, Color y Personal numérico -->
+        <div class="w-full space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Frecuencia:</label>
+              <select name="frecuencia" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm">
+                {% for unidad in unidades %}
+                <option value="{{ unidad.id }}">{{ unidad.descripcion }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Color:</label>
+              <div class="flex items-center gap-1">
+                <input type="color" name="color" class="border border-gray-300 rounded-lg w-10 h-9 p-1 bg-white cursor-pointer" value="#579DA2">
+                <span class="text-[10px] text-gray-500 leading-tight">Paleta</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Personal requerido:</label>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-gray-500 shrink-0">Mín</span>
+                <input type="number" name="min_personas" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-gray-500 shrink-0">Máx</span>
+                <input type="number" name="max_personas" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- Bloque Insumos Asociados -->
+        <div class="w-full xl:w-1/4 flex flex-col">
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-sm font-medium text-gray-700">Insumos asociados:</label>
+            <button type="button" onclick="document.getElementById('modalCrearInsumo').classList.remove('hidden')"
+                    class="text-xs text-[var(--primary)] hover:underline font-semibold">
+              + Crear Insumo
+            </button>
+          </div>
+          <div class="border border-gray-200 rounded-lg p-2 h-28 overflow-y-auto bg-gray-50 space-y-2 flex-grow">
+            {% for insumo in insumos %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm gap-1">
+              <label class="flex items-center text-xs font-medium text-gray-700 cursor-pointer">
+                <input type="checkbox" name="insumos" value="{{ insumo.id_insumo }}" class="w-4 h-4 rounded text-blue-600 mr-1.5">
+                <span>{{ insumo.descripcion }}</span>
+              </label>
+              <div class="flex items-center gap-1 self-end sm:self-auto">
+                <span class="text-[9px] text-gray-400">Sugerida:</span>
+                <input type="number" step="0.01" name="cantidad_{{ insumo.id_insumo }}" class="border border-gray-300 rounded p-0.5 w-14 text-xs text-center" value="0">
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Bloque Personal Encargado Asignado -->
+        <div class="w-full xl:w-1/4 flex flex-col">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Personal Encargado Asignado:</label>
+          <div class="border border-gray-200 rounded-lg p-2 h-28 overflow-y-auto bg-gray-50 space-y-1.5 flex-grow">
+            {% for persona in personal_lista %}
+            <label class="flex items-center justify-between p-1.5 bg-white rounded border border-gray-100 shadow-sm cursor-pointer hover:bg-gray-50">
+              <div class="flex items-center text-xs text-gray-700">
+                <input type="checkbox" name="personal_encargado" value="{{ persona.id_cedula }}" class="w-4 h-4 rounded text-blue-600 mr-1.5">
+                <span class="font-medium">{{ persona.nombre }}</span>
+              </div>
+              <span class="text-[9px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full font-semibold">
+                {{ persona.rol }}
+              </span>
+            </label>
+            {% empty %}
+            <p class="text-xs text-gray-400 italic p-2 text-center">No hay personal registrado.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botón de Guardar en la parte inferior del bloque horizontal -->
+      <div class="mt-4 pt-3 border-t flex justify-end">
+        <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition-colors text-sm text-center">
+          💾 Guardar y Agregar Actividad
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- SECCIÓN 2: Actividades Programadas (Ancho completo) -->
+  {% if actividades %}
+  <div class="w-full bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
+    <h3 class="text-lg font-bold text-gray-800 text-center sm:text-left mb-3">Actividades programadas para Cultivo <span style="color: var(--celdanor);">{{ cultivo_seleccionado }}</span></h3>
+    <div class="overflow-x-auto w-full border border-gray-200 rounded-lg">
+      <table class="w-full text-sm text-left text-gray-500 min-w-[900px]">
+        <thead class="text-xs text-blue-800 uppercase bg-blue-50 border-b">
+          <tr>
+            <th scope="col" class="px-4 py-3">Actividad</th>
+            <th scope="col" class="px-4 py-3 text-center">Color</th>
+            <th scope="col" class="px-4 py-3 text-center">Día Inicio</th>
+            <th scope="col" class="px-4 py-3 text-center">Frecuencia</th>
+            <th scope="col" class="px-4 py-3 text-center">Rango Personal</th>
+            <th scope="col" class="px-4 py-3">Insumos Requeridos</th>
+            <th scope="col" class="px-4 py-3 text-center">Personal</th>
+            <th scope="col" class="px-4 py-3 text-center">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          {% for act in actividades %}
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3 font-semibold text-gray-900">{{ act.id_actividad.descripcion }}</td>
+            <td class="px-4 py-3 text-center">
+              <div class="flex flex-col items-center justify-center gap-1">
+                <span class="inline-block w-6 h-6 rounded-md shadow-inner border border-gray-300" style="background-color: {{ act.color }}"></span>
+                <span class="text-[10px] text-gray-400 font-mono">{{ act.color }}</span>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-center font-medium">{{ act.dia_inicio }}</td>
+            <td class="px-4 py-3 text-center"><span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded">{{ act.frecuencia.descripcion }}</span></td>
+            <td class="px-4 py-3 text-center text-xs">
+              <span class="font-medium text-gray-700">Min: {{ act.min_personas }}</span> / 
+              <span class="font-medium text-gray-700">Max: {{ act.max_personas }}</span>
+            </td>
+            <td class="px-4 py-3 text-xs leading-relaxed">
+              {% for insumo in act.fk_CultivoActividadInsumo1.all %}
+              <div class="flex items-center gap-1 mb-0.5">
+                <span class="text-blue-500">•</span>
+                <span>{{ insumo.id_insumo.descripcion }} <strong class="text-gray-700">({{ insumo.cantidad_sugerida }})</strong></span>
+              </div>
+              {% empty %}
+              <span class="text-gray-400 italic">- Sin insumos -</span>
+              {% endfor %}
+            </td>
+            <td class="px-4 py-3 text-xs leading-relaxed">
+              {% for personal in act.fk_CultivoActividadPersonal_Base.all %}
+              <div class="flex items-center gap-1 mb-0.5">
+                <span class="text-blue-500">•</span>
+                <span>{{ personal.id_personal.nombre }} <strong class="text-gray-700">({{ personal.id_personal.rol }})</strong></span>
+              </div>
+              {% empty %}
+              <span class="text-gray-400 italic">- Sin personal -</span>
+              {% endfor %}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <form method="post" action="{% url 'borrar_actividadcultivo' act.pk %}" onsubmit="return confirm('¿Está seguro de borrar esta actividad?');">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 transition-colors">
+                  Borrar
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- SECCIÓN 3: Planeación Semanal / Calendario (Ancho completo) -->
+  <div class="w-full bg-white border border-green-200 rounded-xl p-4 shadow-sm flex flex-col">
+    <div class="text-green-600 font-bold text-base mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-green-100 pb-2">
+      <span class="flex items-center"><span class="mr-2">📅</span> Planeación Semanal {{cultivo_seleccionado}} (cada 7 días)</span>
+      <div class="flex gap-2">
+        {% if semana_actual > 1 %}
+        <a href="?cultivo={{ cultivo_seleccionado.id_cultivo }}&semana={{ semana_actual|add:"-1" }}"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1 rounded-lg text-xs transition-colors border border-gray-200">
+          ◀ Anterior
+        </a>
+        {% endif %}
+        {% if semana_actual <= semanas|length %}
+          <a href="?cultivo={{ cultivo_seleccionado.id_cultivo }}&semana={{ semana_actual|add:"1" }}"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1 rounded-lg text-xs transition-colors border border-gray-200">
+            Siguiente ▶
+          </a>
+        {% endif %}        
+      </div>
+    </div>
+
+    <div class="w-full overflow-x-auto">
+      <div class="min-w-[600px]"> 
+        <table class="w-full table-fixed border-collapse border border-gray-200">
+          <thead>
+            <tr class="bg-green-50">
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 1</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 2</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 3</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 4</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 5</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 6</th>
+              <th class="border border-gray-200 py-1.5 text-center text-xs font-semibold text-green-800">Día 7</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for semana in semanas %}
+            <tr>
+              {% for dia in semana %}
+              <td class="h-24 border border-gray-200 p-1 align-top bg-white hover:bg-gray-50 transition-colors">
+                {% if dia %}
+                <div class="text-[10px] text-gray-400 font-bold mb-1">Día {{ dia }}</div>
+                <div class="space-y-1 overflow-y-auto max-h-16">
+                  {% for act in actividades_planeadas %}
+                  {% if act.dia == dia %}
+                  <div style="border-left-color: {{ act.actividad.color }}" 
+                        class="text-[10px] p-1 bg-gray-50 border-l-2 font-medium truncate" 
+                        title="{{ act.actividad.id_actividad.descripcion }}">
+                    {{ act.actividad.id_actividad.descripcion }}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALES (Permanecen intactos abajo para no interferir en el flujo visual principal) -->
+<div id="modalCrearCultivo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌱 Crear Nuevo Cultivo</h3>
+    <form method="post" action="{% url 'crear_cultivo' %}" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción / Nombre:</label>
+        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo agrícola (días):</label>
+        <input type="number" name="tiempo_agricola" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                onclick="document.getElementById('modalCrearCultivo').classList.add('hidden')">Cancelar</button>
+        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalCrearActividad" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🛠️ Crear Nueva Actividad</h3>
+    <form method="post" action="{% url 'crear_actividad' %}" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Actividad:</label>
+        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad:</label>
+        <select name="prioridad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+          <option value="baja">Baja</option>
+          <option value="media" selected>Media</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                onclick="document.getElementById('modalCrearActividad').classList.add('hidden')">Cancelar</button>
+        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalCrearInsumo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">📦 Crear Nuevo Insumo</h3>
+    <form method="post" action="{% url 'crear_insumo' %}" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Insumo:</label>
+        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad existente inicial:</label>
+        <input type="number" step="0.01" name="cantidad_existente" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Insumo:</label>
+        <select name="tipo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm">
+          {% for value, label in tipos %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                onclick="document.getElementById('modalCrearInsumo').classList.add('hidden')">Cancelar</button>
+        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalDetallesPersonal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+    <h3 class="text-lg font-bold text-gray-800 mb-1" id="modalActividadNombre">Detalles de Actividad</h3>
+    <p class="text-xs text-gray-500 mb-4">Planificación de requerimientos de personal</p>
+
+    <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl mb-4 text-center border border-gray-200">
+      <div>
+        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mínimo Requerido</span>
+        <span class="text-xl font-extrabold text-blue-600" id="modalMinPersonas">0</span>
+      </div>
+      <div class="border-l border-gray-200">
+        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Máximo Permitido</span>
+        <span class="text-xl font-extrabold text-blue-600" id="modalMaxPersonas">0</span>
+      </div>
+    </div>
+
+    <div class="mb-4 space-y-2">
+      <label class="block font-bold text-sm text-gray-700">Personal Encargado Asignado:</label>
+      <ul id="modalListaPersonal" class="border border-gray-200 rounded-lg p-2 max-h-40 overflow-y-auto bg-gray-50 space-y-1.5 text-sm text-gray-700">
+      </ul>
+    </div>
+
+    <div class="flex justify-end pt-3 border-t border-gray-100">
+      <button type="button" class="w-full bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+              onclick="document.getElementById('modalDetallesPersonal').classList.add('hidden')">
+        Cerrar Ventana
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModalPersonal(actividad, min, max, personalRaw) {
+    const modal = document.getElementById("modalDetallesPersonal");
+    
+    document.getElementById("modalActividadNombre").innerText = actividad;
+    document.getElementById("modalMinPersonas").innerText = min;
+    document.getElementById("modalMaxPersonas").innerText = max;
+
+    const listaUl = document.getElementById("modalListaPersonal");
+    listaUl.innerHTML = ""; 
+
+    const personasArray = personalRaw.split("|").filter(p => p.trim() !== "");
+
+    if (personasArray.length === 0 || personasArray[0] === "Ninguno") {
+        listaUl.innerHTML = `<li class="text-gray-400 italic p-3 text-center text-xs">No hay personal asignado a esta actividad.</li>`;
+    } else {
+        personasArray.forEach(persona => {
+            const li = document.createElement("li");
+            li.className = "p-2 bg-white border border-gray-200 rounded-lg shadow-2xs text-xs flex justify-between items-center font-medium";
+            li.innerHTML = `<span>👤 ${persona}</span>`;
+            listaUl.appendChild(li);
+        });
+    }
+
+    modal.classList.remove("hidden");
+}
+</script>
+
+{% endblock %}

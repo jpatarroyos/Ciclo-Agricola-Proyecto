@@ -1,115 +1,207 @@
 {% extends "base_dashboard.html" %}
 
-{% block subnavbar_title %}Menu Crear Personal{% endblock %}
+{% block subnavbar_title %}Menú Crear Personal{% endblock %}
 
 {% block dashboard_content %}
+<div class="p-2 sm:p-4 max-w-6xl mx-auto space-y-6">
 
-<h2 class="text-xl font-bold mb-4 text-[var(--focus)]">Personal registrado</h2>
-<table class="w-full bg-white shadow rounded text-center py-1">
-    <tr>
-        <th class="align-middle">Cédula</th>
-        <th class="align-middle">Nombre</th>
-        <th class="align-middle">Teléfono</th>
-        <th class="align-middle">Email</th>
-        <th class="align-middle">Rol</th>
-        <th class="align-middle">Acciones</th>
-    </tr>
-    {% for persona in personas %}
-    <tr class="my-1">
-        <td class="align-middle">{{ persona.id_cedula }}</td>
-        <td class="align-middle">{{ persona.nombre }}</td>
-        <td class="align-middle">{{ persona.telefono }}</td>
-        <td class="align-middle">{{ persona.email }}</td>
-        <td class="align-middle">{{ persona.rol }}</td>
-        <td class="align-middle">
-            <button type="button"
-                    onclick="abrirModal('{{ persona.pk }}')"
-                    class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1 rounded">
-                Editar
-            </button>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+  <div class="border-b border-gray-100 pb-3">
+    <h2 class="text-xl sm:text-2xl font-bold text-[var(--focus)] tracking-tight">👥 Personal Registrado</h2>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Administre el equipo de trabajo, controle sus datos de contacto y asigne sus roles operativos en el sistema.</p>
+  </div>
 
-<!-- Botón Crear -->
-<div class="mt-4">
-    <button type="button"
-            onclick="document.getElementById('modalCrear').classList.remove('hidden')"
-            class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-4 py-2 rounded">
-        Crear Personal
-    </button>
+  <div class="bg-white border border-gray-200 rounded-xl shadow-xs overflow-hidden">
+    
+    <div class="p-4 bg-gray-50/70 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <span class="text-sm font-bold text-gray-700">Lista de Operadores e Integrantes</span>
+      
+      <button type="button"
+              onclick="document.getElementById('modalCrear').classList.remove('hidden')"
+              class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2.5 rounded-lg text-xs transition-colors shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer">
+        <span>➕</span> Registrar Nuevo Personal
+      </button>
+    </div>
+
+    <div class="overflow-x-auto w-full">
+      <table class="w-full text-sm text-left text-gray-500 min-w-[750px]">
+        <thead class="text-xs text-blue-900 uppercase bg-blue-50/60 border-b border-gray-200">
+          <tr>
+            <th scope="col" class="px-5 py-3 text-center w-36">Cédula</th>
+            <th scope="col" class="px-5 py-3">Nombre</th>
+            <th scope="col" class="px-5 py-3">Teléfono</th>
+            <th scope="col" class="px-5 py-3">Email</th>
+            <th scope="col" class="px-5 py-3 text-center w-36">Rol Operativo</th>
+            <th scope="col" class="px-5 py-3 text-center w-28">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          {% for persona in personas %}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="px-5 py-3.5 text-center font-mono text-xs text-gray-700 bg-gray-50/20">
+                {{ persona.id_cedula }}
+              </td>
+              <td class="px-5 py-3.5 font-semibold text-gray-900">
+                {{ persona.nombre }}
+              </td>
+              <td class="px-5 py-3.5 text-gray-600">
+                {% if persona.telefono %}{{ persona.telefono }}{% else %}<span class="text-gray-300 italic">No asignado</span>{% endif %}
+              </td>
+              <td class="px-5 py-3.5 text-gray-600 lowercase text-xs">
+                {% if persona.email %}{{ persona.email }}{% else %}<span class="text-gray-300 italic">-</span>{% endif %}
+              </td>
+              <td class="px-5 py-3.5 text-center">
+                <span class="inline-block px-2.5 py-1 rounded-md text-xs font-bold tracking-wide
+                  {% if persona.rol == 'Fumigador' %} bg-amber-50 text-amber-700 border border-amber-200
+                  {% elif persona.rol == 'Agricultor' %} bg-emerald-50 text-emerald-700 border border-emerald-200
+                  {% elif persona.rol == 'Recolector' %} bg-blue-50 text-blue-700 border border-blue-200
+                  {% else %} bg-gray-50 text-gray-700 border border-gray-200 {% endif %}">
+                  {{ persona.rol }}
+                </span>
+              </td>
+              <td class="px-5 py-3.5 text-center">
+                <button type="button"
+                        onclick="abrirModal('{{ persona.pk }}')"
+                        class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs">
+                  Editar
+                </button>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-12 text-gray-400 italic bg-gray-50/30">
+                <div class="flex flex-col items-center justify-center space-y-2">
+                  <span class="text-3xl">👥</span>
+                  <span class="text-sm font-medium">No se ha registrado personal en la base de datos de la finca.</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
-<!-- Modal Crear -->
-<div id="modalCrear" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
-    <h2 class="text-xl font-bold mb-4">Crear Personal</h2>
-    <form method="post">
+<div id="modalCrear" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
+    
+    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">🧑‍🌾 Registrar Personal</h3>
+    <p class="text-xs text-gray-400 mb-4">Ingrese la información básica para dar de alta un nuevo operario.</p>
+    
+    <form method="post" class="space-y-4">
       {% csrf_token %}
-      <strong>Cédula:</strong>
-      <input type="text" name="id_cedula" class="border rounded px-3 py-2 w-full mb-2" required>
-      <strong>Nombre:</strong>
-      <input type="text" name="nombre" class="border rounded px-3 py-2 w-full mb-2" required>
-      <strong>Teléfono:</strong>
-      <input type="text" name="telefono" class="border rounded px-3 py-2 w-full mb-2">
-      <strong>Email:</strong>
-      <input type="email" name="email" class="border rounded px-3 py-2 w-full mb-2">
-      <strong>Rol:</strong>
-      <select name="rol" class="border rounded px-3 py-2 w-full mb-2">
-        <option value="Agricultor">Agricultor</option>
-        <option value="Fumigador">Fumigador</option>
-        <option value="Recolector">Recolector</option>
-        <option value="Varios">Varios</option>
-      </select>
-      <button type="submit" name="crear_personal" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar</button>
-      <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+      
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula / ID Identificación:</label>
+        <input type="text" name="id_cedula" placeholder="Ej: 10234567..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
+        <input type="text" name="nombre" placeholder="Nombre y Apellidos" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
+          <input type="text" name="telefono" placeholder="Ej: 3001234567" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
+          <select name="rol" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+            <option value="Agricultor">Agricultor</option>
+            <option value="Fumigador">Fumigador</option>
+            <option value="Recolector">Recolector</option>
+            <option value="Varios">Varios</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
+        <input type="email" name="email" placeholder="correo@empresa.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+      </div>
+      
+      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+        <button type="button" 
+                onclick="document.getElementById('modalCrear').classList.add('hidden')" 
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" name="crear_personal" 
+                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
+          Guardar Registro
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
-<!-- Modal único para editar persona -->
-<div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-lg w-96 p-6">
-    <h2 class="text-xl font-bold mb-4">Editar Personal</h2>
-    <form method="post" id="formEditarPersona">
+<div id="modalEditar" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
+    
+    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">📝 Modificar Ficha de Personal</h3>
+    <p class="text-xs text-gray-400 mb-4">Actualice la información de contacto o el perfil de asignación laboral.</p>
+    
+    <form method="post" id="formEditarPersona" class="space-y-4">
       {% csrf_token %}
       <input type="hidden" name="persona_id" id="personaIdInput">
+      
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula (No modificable):</label>
+        <input type="text" id="cedulaInput" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-500 cursor-not-allowed border-dashed">
+      </div>
 
-      <strong>Cédula:</strong>
-      <input type="text" id="cedulaInput" disabled class="border rounded px-3 py-2 w-full mb-2">
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
+        <input type="text" name="nombre" id="nombreInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
+      </div>
 
-      <strong>Nombre:</strong>
-      <input type="text" name="nombre" id="nombreInput" class="border rounded px-3 py-2 w-full mb-2" required>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
+          <input type="text" name="telefono" id="telefonoInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
+          <select name="rol" id="rolInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+            <option value="Agricultor">Agricultor</option>
+            <option value="Fumigador">Fumigador</option>
+            <option value="Recolector">Recolector</option>
+            <option value="Varios">Varios</option>
+          </select>
+        </div>
+      </div>
 
-      <strong>Teléfono:</strong>
-      <input type="text" name="telefono" id="telefonoInput" class="border rounded px-3 py-2 w-full mb-2">
-
-      <strong>Email:</strong>
-      <input type="email" name="email" id="emailInput" class="border rounded px-3 py-2 w-full mb-2">
-
-      <strong>Rol:</strong>
-      <select name="rol" id="rolInput" class="border rounded px-3 py-2 w-full mb-2">
-        <option value="Agricultor">Agricultor</option>
-        <option value="Fumigador">Fumigador</option>
-        <option value="Recolector">Recolector</option>
-        <option value="Varios">Varios</option>
-      </select>
-      <button type="submit" name="editar_personal" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] px-2 py-1 rounded">Guardar cambios</button>
-      <button type="button" onclick="document.getElementById('modalEditar').classList.add('hidden')" class="bg-[var(--cancel)] hover:bg-[var(--cancelFocus)] text-[var(--secondary)] px-2 py-1 rounded">Cancelar</button>
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
+        <input type="email" name="email" id="emailInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
+      </div>
+      
+      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+        <button type="button" 
+                onclick="document.getElementById('modalEditar').classList.add('hidden')" 
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" name="editar_personal" 
+                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
+          Guardar Cambios
+        </button>
+      </div>
     </form>
   </div>
 </div>
+
 <script>
   function abrirModal(id) {
-    id = parseInt(id); // convertir a número
-    fetch(`/persona/${id}/`) // endpoint que devuelve datos de la persona
+    id = parseInt(id); 
+    fetch(`/persona/${id}/`) 
       .then(response => response.json())
       .then(data => {
-          // Mostrar modal
           document.getElementById("modalEditar").classList.remove("hidden");
 
-          // Llenar inputs
           document.getElementById("personaIdInput").value = data.persona.pk;
           document.getElementById("cedulaInput").value = data.persona.id_cedula;
           document.getElementById("nombreInput").value = data.persona.nombre;
@@ -119,5 +211,4 @@
       });
   }
 </script>
-
 {% endblock %}

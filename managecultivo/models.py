@@ -95,6 +95,7 @@ class Personal(models.Model):
         ("Fumigador", "Fumigador"),
         ("Recolector", "Recolector"),
         ("Varios", "Varios"),
+        ("Monitor", "Monitor"),
     ]
     rol = models.CharField(max_length=20, choices=ROLES, default="Varios")
 
