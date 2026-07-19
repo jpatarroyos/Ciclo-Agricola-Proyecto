@@ -44,12 +44,13 @@
     </div>
 
     <div class="overflow-x-auto w-full">
-      <table class="w-full text-sm text-left text-gray-500 min-w-[600px]">
+      <table class="w-full text-sm text-left text-gray-500 min-w-[650px]">
         <thead class="text-xs text-blue-900 uppercase bg-blue-50/60 border-b border-gray-200">
           <tr>
             <th scope="col" class="px-5 py-3 text-center w-36">Fecha</th>
             <th scope="col" class="px-5 py-3">Observación Técnica</th>
             <th scope="col" class="px-5 py-3 w-48">Registrado Por</th>
+            <th scope="col" class="px-5 py-3 text-center w-24">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -71,10 +72,22 @@
                   <span class="truncate">{{ monitoreo.registrado_por }}</span>
                 </div>
               </td>
+              <td class="px-5 py-3.5 text-center">
+                <form method="post" onsubmit="return confirm('¿Está seguro de que desea eliminar este registro de monitoreo? Esta acción no se puede deshacer.');" class="inline-block">
+                  {% csrf_token %}
+                  <input type="hidden" name="monitoreo_id" value="{{ monitoreo.id }}">
+                  <input type="hidden" name="ciclo_id_actual" value="{{ ciclo_id }}">
+                  <button type="submit" name="eliminar_monitoreo" title="Eliminar registro" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                  </button>
+                </form>
+              </td>
             </tr>
           {% empty %}
             <tr>
-              <td colspan="3" class="text-center py-10 text-gray-400 italic bg-gray-50/30">
+              <td colspan="4" class="text-center py-10 text-gray-400 italic bg-gray-50/30">
                 <div class="flex flex-col items-center justify-center space-y-2">
                   <span class="text-3xl">📭</span>
                   <span class="text-sm">No hay registros de monitoreo para el ciclo seleccionado o no ha realizado una consulta aún.</span>
