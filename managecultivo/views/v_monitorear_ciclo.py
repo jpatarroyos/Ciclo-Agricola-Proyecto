@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from ..models import CicloMonitoreo, Ciclo
@@ -30,7 +30,20 @@ def ciclo_monitoreo(request):
                 registrado_por=request.user
             )
         return redirect("monitorear_ciclo")
+    
+    if request.method == "POST" and "eliminar_monitoreo" in request.POST:
+        monitoreo_id = request.POST.get("monitoreo_id")
+        # get_object_or_404 evita errores si el ID no existe o ya fue borrado
+        monitoreo = get_object_or_404(CicloMonitoreo, id=monitoreo_id)
+        monitoreo.delete()
+        
 
+        ciclo_actual = request.POST.get("ciclo_id_actual")
+        if ciclo_actual:
+            return redirect(f"/monitorear_ciclo/?ciclo={ciclo_actual}") # Ajusta la URL según tu urls.py
+            
+        return redirect("monitorear_ciclo")
+    
     context = {
         "fecha_hoy": fecha_hoy,
         "ciclos": ciclos,
