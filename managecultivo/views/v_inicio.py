@@ -34,7 +34,7 @@ def bienvenida(request):
         CicloActividad.objects
         .filter(fecha_programada=fecha_hoy)
         .select_related("id_ciclo", "id_actividad", "id_ciclo__id_cultivo", "id_ciclo__id_zonaagricola")
-        .order_by("-id_actividad__prioridad")  # Alta primero
+        .order_by("id_ciclo", "-id_actividad__prioridad") 
     )
     context = {
         "usuario": request.user,
