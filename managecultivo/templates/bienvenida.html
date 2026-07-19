@@ -2,22 +2,97 @@
 {% load static %}
 
 {% block dashboard_content %}
-   
-<div class="w-full md:w-3/5 flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white border-b md:border-b-0 md:border-r border-gray-200">
+<div class="flex flex-col md:flex-row md:min-h-[calc(100vh-240px)] bg-gray-50 rounded-xl overflow-hidden shadow-sm">
     
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium mb-6">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-        Hoy es {{ fecha_hoy|date:"l j \d\e F \d\e Y" }}
+    <div class="w-full md:w-3/5 flex flex-col items-center justify-center text-center p-8 md:p-12 bg-white border-b md:border-b-0 md:border-r border-gray-200">
+        
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium mb-6">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Hoy es {{ fecha_hoy|date:"l j \d\e F \d\e Y" }}
+        </div>
+
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-8 text-[var(--primary)] tracking-tight">
+            ¡Hola, <span class="text-[var(--focus)]">{{ usuario.username }}</span>! 👋
+        </h2>
+
+        <div class="max-w-xs md:max-w-sm w-full transition-transform duration-300 hover:scale-105">
+            <img src="{% static 'assets/img/logo.png' %}" alt="Logo AgroPlan" class="w-full h-auto mx-auto object-contain drop-shadow-md">
+        </div>
+
     </div>
 
-    <h2 class="text-3xl md:text-4xl font-extrabold mb-8 text-[var(--primary)] tracking-tight">
-        ¡Hola, <span class="text-[var(--focus)]">{{ usuario.username }}</span>! 👋
-    </h2>
+    <div class="w-full md:w-2/5 bg-gray-100 p-6 md:p-8 flex flex-col">
+        
+        <div class="flex items-center gap-2 mb-6">
+            <span class="w-2 h-6 bg-[var(--primary)] rounded-full"></span>
+            <h3 class="text-xl md:text-2xl font-bold text-[var(--primary)] tracking-wide uppercase">Para Hoy</h3>
+        </div>
 
-    <div class="max-w-xs md:max-w-sm w-full transition-transform duration-300 hover:scale-105">
-        <img src="{% static 'assets/img/logo.png' %}" alt="Logo AgroPlan" class="w-full h-auto mx-auto object-contain drop-shadow-md">
+        <div class="space-y-4 md:overflow-y-auto md:max-h-[500px] pr-1">
+            {% regroup actividades_hoy by id_ciclo as ciclos %}
+            
+            {% for ciclo in ciclos %}
+                <!-- Contenedor único por cada Ciclo/Cultivo -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    
+                    <!-- Cabecera del Ciclo con las dos líneas solicitadas -->
+                    <div class="bg-blue-50/50 px-4 py-3 border-b border-gray-100">
+                        
+                        <!-- PRIMERA LÍNEA: Cultivo y Fechas (Asumiendo que se llaman fecha_inicio y fecha_fin en tu modelo Ciclo) -->
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-base font-bold text-gray-800">
+                                <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider block md:inline md:mr-1">Cultivo:</span>
+                                {{ ciclo.grouper.id_cultivo.descripcion }}
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center gap-3 bg-white px-3 py-1 rounded border border-gray-100 shadow-sm">
+                                <span><strong>Inicio:</strong> {{ ciclo.grouper.fecha_inicio|date:"d/m/Y" }}</span>
+                                <span class="text-gray-300">|</span>
+                                <span><strong>Fin:</strong> {{ ciclo.grouper.fecha_fin|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- SEGUNDA LÍNEA: Zona Agrícola -->
+                        <div class="text-sm text-gray-600 mt-2 flex items-center gap-1 border-t border-gray-200/60 pt-1.5">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span><strong>Zona:</strong> {{ ciclo.grouper.id_zonaagricola.nombre }}</span>
+                        </div>
+
+                    </div>
+
+                    <!-- Bloque Único de Actividades para esta Zona/Cultivo -->
+                    <div class="p-4 bg-white">
+                        <ul class="space-y-3">
+                            {% for act in ciclo.list %}
+                                <li class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150">
+                                    <span class="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500 mt-2"></span>
+                                    
+                                    <div class="flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm">{{ act.id_actividad.descripcion }}</p>
+                                        <span class="inline-block text-xs font-medium px-2 py-0.5 mt-1 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                                            Prioridad: {{ act.id_actividad.get_prioridad_display|default:act.id_actividad.prioridad }}
+                                        </span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+            {% empty %}
+                <!-- Estado Vacío -->
+                <div class="text-center py-12 px-4 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                    <p class="font-medium text-base">Al día por aquí</p>
+                    <p class="text-sm text-gray-400 mt-1">No hay actividades programadas para hoy.</p>
+                </div>
+            {% endfor %}
+        </div>
+
     </div>
-
 </div>
-
 {% endblock %}
