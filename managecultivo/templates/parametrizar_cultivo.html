@@ -13,6 +13,9 @@
   {% if messages %}
   <div class="space-y-2">
     {% for message in messages %}
+    <button type="button" class="text-gray-400 hover:text-gray-600 font-bold px-2" onclick="this.parentElement.remove()">
+      &times;
+    </button>    
     <div class="p-3 rounded-lg text-sm font-medium shadow-sm transition-all
                 {% if message.tags == 'success' %} bg-green-100 text-green-800 border border-green-200
                 {% elif message.tags == 'error' %} bg-red-100 text-red-800 border border-red-200
@@ -33,7 +36,11 @@
                 class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors shrink-0">
           + Crear Cultivo
         </button>
-        <label for="cultivo" class="text-gray-700 font-semibold shrink-0">Cultivo:</label>
+        <button type="button" onclick="document.getElementById('modalBorrarCultivo').classList.remove('hidden')"
+                class="w-full sm:w-auto bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors shrink-0">
+          - Borrar Cultivo
+        </button>
+        <label for="cultivo" class="text-gray-700 font-semibold shrink-0">Seleccione un Cultivo:</label>
         <select id="cultivo" name="id_cultivo" 
                 class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 text-sm" 
                 required onchange="window.location.href='?cultivo=' + this.value;">
@@ -332,6 +339,36 @@
         <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
                 onclick="document.getElementById('modalCrearCultivo').classList.add('hidden')">Cancelar</button>
         <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalBorrarCultivo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌱 Borrar Cultivo</h3>
+    
+    <!-- Asegúrate de que el action coincida con tu urls.py -->
+    <form method="post" action="{% url 'borrar_cultivo' %}" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label for="cultivo_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione el cultivo a eliminar:</label>
+        <!-- SE ELIMINÓ EL onchange PARA EVITAR EL REENVÍO DE URL -->
+        <select id="cultivo_borrar" name="id_cultivo" 
+                class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" 
+                required>
+          <option value="" disabled selected>-- Seleccione un Cultivo --</option>
+          {% for cultivo in cultivos %}
+          <option value="{{ cultivo.id_cultivo }}">
+             {{ cultivo.descripcion }} 
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                onclick="document.getElementById('modalBorrarCultivo').classList.add('hidden')">Cancelar</button>
+        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Borrar</button>
       </div>
     </form>
   </div>

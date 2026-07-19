@@ -74,6 +74,27 @@ def crear_cultivo(request):
     return redirect("parametrizar_cultivo")
 
 
+
+@login_required
+def borrar_cultivo(request):
+    if request.method == "POST":
+        id_cultivo = request.POST.get("id_cultivo")
+        
+        if id_cultivo:
+            cultivo = get_object_or_404(Cultivo, id_cultivo=id_cultivo)
+            
+            # Comprobamos si el cultivo tiene ciclos asociados usando el related_name "fk_ciclo1"
+            if cultivo.fk_ciclo1.exists():
+                # Si existen ciclos, enviamos un mensaje de error y detenemos el borrado
+                messages.error(request, f"No se puede eliminar el cultivo '{cultivo.descripcion}' porque tiene ciclos agrícolas asociados.")
+            else:
+                # Si está limpio, se borra con éxito
+                cultivo.delete()
+                messages.success(request, f"El cultivo '{cultivo.descripcion}' fue eliminado correctamente.")
+            
+    return redirect("parametrizar_cultivo")
+
+
 @login_required
 def crear_actividad(request):
     if request.method == "POST":
