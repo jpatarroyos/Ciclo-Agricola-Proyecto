@@ -40,6 +40,7 @@ urlpatterns = [
     path("monitorear_ciclo/", views.ciclo_monitoreo, name="monitorear_ciclo"),
     path("ajustar_ciclo/<int:ciclo_id>/", views.ajustar_ciclo, name="ajustar_ciclo"),
     path("calendario_ciclo/", views.calendario_ciclo, name="calendario_ciclo"), 
+    path("borrar_cultivo/", views.borrar_cultivo, name="borrar_cultivo"),    
 ]
 # pahth ("", views.funcion, name = "")
 
