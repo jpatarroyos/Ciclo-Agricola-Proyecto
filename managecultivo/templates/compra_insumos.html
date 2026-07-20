@@ -10,18 +10,7 @@
         <p class="text-sm text-gray-500 mt-1">Monitorea los insumos adquiridos y su distribución en los ciclos agrícolas activos</p>
     </div>
 
-    {% if messages %}
-      <div class="space-y-2">
-        {% for message in messages %}
-          <div class="p-4 rounded-xl text-sm font-medium border shadow-sm transition-all animate-fade-in
-                      {% if message.tags == 'error' %} bg-red-50 text-red-800 border-red-200 
-                      {% elif message.tags == 'success' %} bg-green-50 text-green-800 border-green-200 
-                      {% else %} bg-blue-50 text-blue-800 border-blue-200 {% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+
 
     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm max-w-xl">
         <form method="GET" action="">
