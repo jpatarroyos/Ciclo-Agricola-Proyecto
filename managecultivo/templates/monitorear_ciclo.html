@@ -102,40 +102,23 @@
 
 </div>
 
-<div id="modalCrear" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
-    
-    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">📝 Nuevo Registro de Monitoreo</h3>
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrear" modal_titulo="📝 Nuevo Registro de Monitoreo" %}
+
     <p class="text-xs text-gray-400 mb-4">Ingrese los detalles observados en el campo el día de hoy.</p>
     
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="ciclo_id" value="{{ ciclo_id }}">
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Fecha de Registro:</label>
-        <input type="text" value="{{ fecha_hoy|date:'d/m/Y' }}" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-600 cursor-not-allowed">
-        <input type="hidden" name="fecha" value="{{ fecha_hoy|date:'Y-m-d' }}">
-      </div>
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Observación / Reporte:</label>
-        <textarea name="observacion" rows="4" placeholder="Escriba los pormenores, incidencias o novedades fitosanitarias encontradas..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required></textarea>
-      </div>
-      
-      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" 
-                onclick="document.getElementById('modalCrear').classList.add('hidden')" 
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="submit" name="crear_monitoreo" 
-                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
-          Guardar Registro
-        </button>
-      </div>
-    </form>
+    <input type="hidden" name="ciclo_id" value="{{ ciclo_id }}">
     
-  </div>
-</div>
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Fecha de Registro:</label>
+      <input type="text" value="{{ fecha_hoy|date:'d/m/Y' }}" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-600 cursor-not-allowed">
+      <input type="hidden" name="fecha" value="{{ fecha_hoy|date:'Y-m-d' }}">
+    </div>
+    
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Observación / Reporte:</label>
+      <textarea name="observacion" rows="4" placeholder="Escriba los pormenores, incidencias o novedades fitosanitarias encontradas..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required></textarea>
+    </div>
+
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrear" submit_name="crear_monitoreo" boton_texto="Guardar" %}
+
 {% endblock %}
