@@ -83,116 +83,90 @@
 
 </div>
 
-<div id="modalCrear" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
-    
-    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">🧑‍🌾 Registrar Personal</h3>
-    <p class="text-xs text-gray-400 mb-4">Ingrese la información básica para dar de alta un nuevo operario.</p>
-    
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula / ID Identificación:</label>
-        <input type="text" name="id_cedula" placeholder="Ej: 10234567..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
+<!-- ======================================================= -->
+<!-- SECCIÓN DE MODALES OPTIMIZADOS P
+<!-- ======================================================= -->
 
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
-        <input type="text" name="nombre" placeholder="Nombre y Apellidos" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
+<!-- 1. Modal Registrar Personal (Crear) -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrear" modal_titulo="👤 Registrar Personal" %}
+  
+  <p class="text-xs text-gray-400 -mt-2 mb-2">Ingrese la información básica para dar de alta un nuevo operario.</p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
-          <input type="text" name="telefono" placeholder="Ej: 3001234567" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
-          <select name="rol" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-            <option value="Agricultor">Agricultor</option>
-            <option value="Fumigador">Fumigador</option>
-            <option value="Recolector">Recolector</option>
-            <option value="Varios">Varios</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
-        <input type="email" name="email" placeholder="correo@empresa.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-      </div>
-      
-      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" 
-                onclick="document.getElementById('modalCrear').classList.add('hidden')" 
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="submit" name="crear_personal" 
-                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
-          Guardar Registro
-        </button>
-      </div>
-    </form>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula / ID Identificación:</label>
+    <input type="text" name="id_cedula" placeholder="Ej: 10234567..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
   </div>
-</div>
 
-<div id="modalEditar" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
-    
-    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">📝 Modificar Ficha de Personal</h3>
-    <p class="text-xs text-gray-400 mb-4">Actualice la información de contacto o el perfil de asignación laboral.</p>
-    
-    <form method="post" id="formEditarPersona" class="space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="persona_id" id="personaIdInput">
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula (No modificable):</label>
-        <input type="text" id="cedulaInput" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-500 cursor-not-allowed border-dashed">
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
-        <input type="text" name="nombre" id="nombreInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
-          <input type="text" name="telefono" id="telefonoInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
-          <select name="rol" id="rolInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-            <option value="Agricultor">Agricultor</option>
-            <option value="Fumigador">Fumigador</option>
-            <option value="Recolector">Recolector</option>
-            <option value="Varios">Varios</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
-        <input type="email" name="email" id="emailInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden">
-      </div>
-      
-      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" 
-                onclick="document.getElementById('modalEditar').classList.add('hidden')" 
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="submit" name="editar_personal" 
-                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
-          Guardar Cambios
-        </button>
-      </div>
-    </form>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
+    <input type="text" name="nombre" placeholder="Nombre y Apellidos" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
   </div>
-</div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
+      <input type="text" name="telefono" placeholder="Ej: 3001234567" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
+      <select name="rol" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+        <option value="Agricultor">Agricultor</option>
+        <option value="Fumigador">Fumigador</option>
+        <option value="Recolector">Recolector</option>
+        <option value="Varios">Varios</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
+    <input type="email" name="email" placeholder="correo@empresa.com" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+  </div>
+
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrear" submit_name="crear_personal" boton_texto="Guardar Registro" %}
+
+
+<!-- 2. Modal Modificar Ficha de Personal (Editar único con carga Fetch) -->
+<!-- Nota: Pasamos el atributo id="formEditarPersona" mediante modal_attrs para mantener la compatibilidad con el backend -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalEditar" modal_titulo="📝 Modificar Ficha de Personal" modal_attrs='id="formEditarPersona"' %}
+  
+  <p class="text-xs text-gray-400 -mt-2 mb-2">Actualice la información de contacto o el perfil de asignación laboral.</p>
+  
+  <!-- Campo oculto para el ID de la persona, requerido por JavaScript -->
+  <input type="hidden" name="persona_id" id="personaIdInput">
+
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cédula (No modificable):</label>
+    <input type="text" id="cedulaInput" disabled class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-sm font-semibold text-gray-500 cursor-not-allowed border-dashed outline-none">
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre Completo:</label>
+    <input type="text" name="nombre" id="nombreInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Teléfono:</label>
+      <input type="text" name="telefono" id="telefonoInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Rol / Especialidad:</label>
+      <select name="rol" id="rolInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+        <option value="Agricultor">Agricultor</option>
+        <option value="Fumigador">Fumigador</option>
+        <option value="Recolector">Recolector</option>
+        <option value="Varios">Varios</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico:</label>
+    <input type="email" name="email" id="emailInput" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none">
+  </div>
+
+{% include 'componentes/modal_cerrar.html' with modal_id="modalEditar" submit_name="editar_personal" boton_texto="Guardar Cambios" %}
 
 <script>
   function abrirModal(id) {

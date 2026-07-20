@@ -4,27 +4,13 @@
 
 {% block dashboard_content %}
 
+
+
 <div class="p-2 sm:p-4 max-w-7xl mx-auto space-y-6">
   
   <h2 class="text-xl sm:text-2xl font-bold text-[var(--focus)] border-b pb-2">
     Configurar Cultivo - Actividad - Insumo (por Hectárea)
   </h2>
-
-  {% if messages %}
-  <div class="space-y-2">
-    {% for message in messages %}
-    <button type="button" class="text-gray-400 hover:text-gray-600 font-bold px-2" onclick="this.parentElement.remove()">
-      &times;
-    </button>    
-    <div class="p-3 rounded-lg text-sm font-medium shadow-sm transition-all
-                {% if message.tags == 'success' %} bg-green-100 text-green-800 border border-green-200
-                {% elif message.tags == 'error' %} bg-red-100 text-red-800 border border-red-200
-                {% else %} bg-blue-100 text-blue-800 border border-blue-200 {% endif %}">
-      {{ message }}
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
 
   <form method="post" action="{% url 'crear_actividadcultivo' %}" class="space-y-6">
     {% csrf_token %}
@@ -322,171 +308,69 @@
 </div>
 
 <!-- MODALES (Permanecen intactos abajo para no interferir en el flujo visual principal) -->
-<div id="modalCrearCultivo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌱 Crear Nuevo Cultivo</h3>
-    <form method="post" action="{% url 'crear_cultivo' %}" class="space-y-4">
-      {% csrf_token %}
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción / Nombre:</label>
-        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo agrícola (días):</label>
-        <input type="number" name="tiempo_agricola" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
-                onclick="document.getElementById('modalCrearCultivo').classList.add('hidden')">Cancelar</button>
-        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
-      </div>
-    </form>
+<!-- Para hacerlo 100% compatible y nativo sin filtros complejos de URLs, inyectamos el action directamente como texto o usamos el atributo nativo del form -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrearCultivo" modal_titulo="🌱 Crear Nuevo Cultivo" modal_attrs='action="/crear_cultivo/"' %}
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción / Nombre:</label>
+    <input type="text" name="descripcion"  placeholder="Nombre Cultivo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
   </div>
-</div>
-
-<div id="modalBorrarCultivo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🌱 Borrar Cultivo</h3>
-    
-    <!-- Asegúrate de que el action coincida con tu urls.py -->
-    <form method="post" action="{% url 'borrar_cultivo' %}" class="space-y-4">
-      {% csrf_token %}
-      <div>
-        <label for="cultivo_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione el cultivo a eliminar:</label>
-        <!-- SE ELIMINÓ EL onchange PARA EVITAR EL REENVÍO DE URL -->
-        <select id="cultivo_borrar" name="id_cultivo" 
-                class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" 
-                required>
-          <option value="" disabled selected>-- Seleccione un Cultivo --</option>
-          {% for cultivo in cultivos %}
-          <option value="{{ cultivo.id_cultivo }}">
-             {{ cultivo.descripcion }} 
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
-                onclick="document.getElementById('modalBorrarCultivo').classList.add('hidden')">Cancelar</button>
-        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Borrar</button>
-      </div>
-    </form>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Tiempo agrícola (días):</label>
+    <input type="number" name="tiempo_agricola"  placeholder="Ej: 45 " class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
   </div>
-</div>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrearCultivo" submit_name="guardar_cultivo" %}
 
-<div id="modalCrearActividad" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🛠️ Crear Nueva Actividad</h3>
-    <form method="post" action="{% url 'crear_actividad' %}" class="space-y-4">
-      {% csrf_token %}
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Actividad:</label>
-        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad:</label>
-        <select name="prioridad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-          <option value="baja">Baja</option>
-          <option value="media" selected>Media</option>
-          <option value="alta">Alta</option>
-        </select>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
-                onclick="document.getElementById('modalCrearActividad').classList.add('hidden')">Cancelar</button>
-        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
-      </div>
-    </form>
+<!-- 2. Modal Borrar Cultivo -->
+
+{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarCultivo" modal_titulo="🗑️ Borrar Cultivo" modal_attrs='action="/borrar_cultivo/"' %}
+  <div>
+    <label for="cultivo_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione el cultivo a eliminar:</label>
+    <select id="cultivo_borrar" name="id_cultivo" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" required>
+      <option value="" disabled selected>-- Seleccione un Cultivo --</option>
+      {% for cultivo in cultivos %}
+        <option value="{{ cultivo.id_cultivo }}">{{ cultivo.descripcion }}</option>
+      {% endfor %}
+    </select>
   </div>
-</div>
 
-<div id="modalCrearInsumo" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">📦 Crear Nuevo Insumo</h3>
-    <form method="post" action="{% url 'crear_insumo' %}" class="space-y-4">
-      {% csrf_token %}
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Insumo:</label>
-        <input type="text" name="descripcion" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad existente inicial:</label>
-        <input type="number" step="0.01" name="cantidad_existente" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Insumo:</label>
-        <select name="tipo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm">
-          {% for value, label in tipos %}
-          <option value="{{ value }}">{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
-                onclick="document.getElementById('modalCrearInsumo').classList.add('hidden')">Cancelar</button>
-        <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Guardar</button>
-      </div>
-    </form>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalBorrarCultivo" submit_name="borrar_cultivo" boton_texto="Borrar" boton_clase="bg-red-600 hover:bg-red-700 text-white" %}
+
+<!-- 3. Modal Crear Actividad -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrearActividad" modal_titulo="⚙️ Crear Nueva Actividad" modal_attrs='action="/crear_actividad/"' %}
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Actividad:</label>
+    <input type="text" name="descripcion"  placeholder="Nombre de la Actividad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
   </div>
-</div>
-
-<div id="modalDetallesPersonal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-    <h3 class="text-lg font-bold text-gray-800 mb-1" id="modalActividadNombre">Detalles de Actividad</h3>
-    <p class="text-xs text-gray-500 mb-4">Planificación de requerimientos de personal</p>
-
-    <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl mb-4 text-center border border-gray-200">
-      <div>
-        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mínimo Requerido</span>
-        <span class="text-xl font-extrabold text-blue-600" id="modalMinPersonas">0</span>
-      </div>
-      <div class="border-l border-gray-200">
-        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Máximo Permitido</span>
-        <span class="text-xl font-extrabold text-blue-600" id="modalMaxPersonas">0</span>
-      </div>
-    </div>
-
-    <div class="mb-4 space-y-2">
-      <label class="block font-bold text-sm text-gray-700">Personal Encargado Asignado:</label>
-      <ul id="modalListaPersonal" class="border border-gray-200 rounded-lg p-2 max-h-40 overflow-y-auto bg-gray-50 space-y-1.5 text-sm text-gray-700">
-      </ul>
-    </div>
-
-    <div class="flex justify-end pt-3 border-t border-gray-100">
-      <button type="button" class="w-full bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
-              onclick="document.getElementById('modalDetallesPersonal').classList.add('hidden')">
-        Cerrar Ventana
-      </button>
-    </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad:</label>
+    <select name="prioridad" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+      <option value="baja">Baja</option>
+      <option value="media" selected>Media</option>
+      <option value="alta">Alta</option>
+    </select>
   </div>
-</div>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrearActividad" submit_name="guardar_actividad" %}
 
-<script>
-function abrirModalPersonal(actividad, min, max, personalRaw) {
-    const modal = document.getElementById("modalDetallesPersonal");
-    
-    document.getElementById("modalActividadNombre").innerText = actividad;
-    document.getElementById("modalMinPersonas").innerText = min;
-    document.getElementById("modalMaxPersonas").innerText = max;
 
-    const listaUl = document.getElementById("modalListaPersonal");
-    listaUl.innerHTML = ""; 
+<!-- 4. Modal Crear Insumo -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrearInsumo" modal_titulo="📦 Crear Nuevo Insumo" modal_attrs='action="/crear_insumo/"' %}
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Insumo:</label>
+    <input type="text" name="descripcion"  placeholder="Nombre del Insumo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad existente inicial:</label>
+    <input type="number" step="0.01" name="cantidad_existente"  placeholder="Ej: 150" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm" required>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Insumo:</label>
+    <select name="tipo" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2 text-sm">
+      {% for value, label in tipos %}
+        <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrearInsumo" submit_name="guardar_insumo" %}
 
-    const personasArray = personalRaw.split("|").filter(p => p.trim() !== "");
-
-    if (personasArray.length === 0 || personasArray[0] === "Ninguno") {
-        listaUl.innerHTML = `<li class="text-gray-400 italic p-3 text-center text-xs">No hay personal asignado a esta actividad.</li>`;
-    } else {
-        personasArray.forEach(persona => {
-            const li = document.createElement("li");
-            li.className = "p-2 bg-white border border-gray-200 rounded-lg shadow-2xs text-xs flex justify-between items-center font-medium";
-            li.innerHTML = `<span>👤 ${persona}</span>`;
-            listaUl.appendChild(li);
-        });
-    }
-
-    modal.classList.remove("hidden");
-}
-</script>
 
 {% endblock %}
