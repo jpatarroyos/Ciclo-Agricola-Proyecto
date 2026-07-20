@@ -1,0 +1,26 @@
+{% if messages %}
+  <div class="mb-4 space-y-2">
+    {% for message in messages %}
+      <div class="p-4 rounded-xl text-sm font-medium border flex items-center justify-between transition-all duration-300
+        {% if message.tags == 'error' %}
+          bg-red-50 text-red-800 border-red-100
+        {% else %}
+          bg-green-50 text-green-800 border-green-100
+        {% endif %}">
+        
+        <div class="flex items-center gap-2">
+          {% if message.tags == 'error' %}
+            🛑
+          {% else %}
+            ✅
+          {% endif %}
+          <span>{{ message.message }}</span>
+        </div>
+        
+        <button type="button" class="text-gray-400 hover:text-gray-600 font-bold px-2" onclick="this.parentElement.remove()">
+          &times;
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

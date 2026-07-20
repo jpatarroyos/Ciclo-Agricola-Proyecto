@@ -64,85 +64,73 @@
 </div>
 
 <!-- Modal Crear -->
-<div id="modalCrear" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h2 class="text-lg font-bold text-gray-900">Crear Usuario</h2>
-        <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-    </div>
-    <form method="post" onsubmit="return validar_crear(this)" class="p-6 space-y-4">
-      {% csrf_token %}  
-      
-      <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
-          <input type="text" name="username" placeholder="Ej. juan.perez" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
-      </div>
-      
-      <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
-          <input type="email" name="email" placeholder="correo@agroplan.com" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
-      </div>
-      
-      <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Clave:</label>
-          <input type="password" name="password" placeholder="••••••••" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
-      </div>
-      
-      <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
-          <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            <option value="Administrador">Administrador</option>
-            <option value="Vendedor">Vendedor</option>
-            <option value="Veterinario">Veterinario</option>
-          </select>
-      </div>
+<!-- 1. Abrimos el modal inyectando la validación JS en los atributos -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrear" modal_titulo="👤 Crear Usuario" modal_attrs='onsubmit="return validar_crear(this)"' %}
 
-      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onclick="document.getElementById('modalCrear').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
-          <button type="submit" name="crear_usuario" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar</button>
-      </div>
-    </form>
+  <!-- 2. Inputs particulares del usuario -->
+  <div>
+      <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
+      <input type="text" name="username" placeholder="Ej. juan.perez" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
   </div>
-</div>
+  
+  <div>
+      <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
+      <input type="email" name="email" placeholder="correo@agroplan.com" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+  </div>
+  
+  <div>
+      <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Clave:</label>
+      <input type="password" name="password" placeholder="••••••••" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+  </div>
+  
+  <div>
+      <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
+      <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+        <option value="Administrador">Administrador</option>
+        <option value="Agricultor">Agricultor</option>
+      </select>
+  </div>
+
+<!-- 3. Cerramos el modal pasando el nombre del disparador POST -->
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrear" submit_name="crear_usuario" %}
+
+
 
 <!-- Modal Editar (uno por usuario) -->
 {% for usuario in usuarios %}
-<div id="modalEditar{{ usuario.id }}" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h2 class="text-lg font-bold text-gray-900">Editar Usuario</h2>
-        <button type="button" onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-    </div>
-    <form method="post" onsubmit="return validar_editar(this)" class="p-6 space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
-      
-      <div>
+  <!-- Convertimos de forma segura el ID numérico a texto para evitar sumas matemáticas en Django -->
+  {% with id_usuario_texto=usuario.id|stringformat:"s" %}
+    {% with id_modal_editar="modalEditar"|add:id_usuario_texto %}
+
+      <!-- 1. Abrimos el componente pasando el ID limpio y la validación JS -->
+      {% include 'componentes/modal_abrir.html' with modal_id=id_modal_editar modal_titulo="✏️ Editar Usuario" modal_attrs='onsubmit="return validar_editar(this)"' %}
+
+        <!-- 2. Inputs particulares del usuario a editar -->
+        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+        
+        <div>
           <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
           <input type="text" value="{{ usuario.username }}" disabled class="border border-gray-200 bg-gray-50 text-gray-500 rounded-lg px-3 py-2 w-full text-sm cursor-not-allowed">
-      </div>
-      
-      <div>
+        </div>
+        
+        <div>
           <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
           <input type="email" name="email" value="{{ usuario.email }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
-      </div>
-      
-      <div>
+        </div>
+        
+        <div>
           <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
           <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             <option value="Administrador" {% if usuario.groups.first.name == "Administrador" %}selected{% endif %}>Administrador</option>
-            <option value="Vendedor" {% if usuario.groups.first.name == "Vendedor" %}selected{% endif %}>Vendedor</option>
-            <option value="Veterinario" {% if usuario.groups.first.name == "Veterinario" %}selected{% endif %}>Veterinario</option>
+            <option value="Agricultor" {% if usuario.groups.first.name == "Agricultor" %}selected{% endif %}>Agricultor</option>
           </select>
-      </div>
+        </div>
 
-      <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
-          <button type="submit" name="editar_usuario" class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-medium px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">Guardar cambios</button>
-      </div>
-    </form>
-  </div>
-</div>
+      <!-- 3. Cerramos el componente con el mismo ID y el disparador del botón -->
+      {% include 'componentes/modal_cerrar.html' with modal_id=id_modal_editar submit_name="editar_usuario" %}
+
+    {% endwith %}
+  {% endwith %}
 {% endfor %}
 
 <script>
