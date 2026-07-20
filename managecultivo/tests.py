@@ -75,3 +75,128 @@ class AgriculturaModelsTestCase(TestCase):
         # Verificar campos opcionales en blanco
         self.assertIsNone(fumigador.telefono)
         self.assertIsNone(fumigador.email)
+
+    from django.contrib.auth.models import User
+from django.test import TestCase
+from datetime import date
+from .models import (
+    ZonaAgricola, Cultivo, Actividad, Insumo, 
+    Ciclo, CicloActividad, CicloActividadInsumo
+)
+
+class GestionCiclosYActividadesTestCase(TestCase):
+
+    def setUp(self):
+        """Configuración de datos base necesarios para los flujos complejos."""
+        # 1. Usuario administrador
+        self.user = User.objects.create_user(
+            username="agronomo_jefe",
+            password="SeguridadFinca2026"
+        )
+        
+        # 2. Zona Agrícola base
+        self.zona = ZonaAgricola.objects.create(
+            nombre="Invernadero 1",
+            ubicacion="Bloque Norte",
+            direccion="Lote 4",
+            registrado_por=self.user
+        )
+        
+        # 3. Cultivo base (ej: Tomate que dura 90 días)
+        self.cultivo = Cultivo.objects.create(
+            descripcion="Tomate Chonto",
+            tiempo_agricola=90,
+            registrado_por=self.user
+        )
+        
+        # 4. Actividad base
+        self.actividad = Actividad.objects.create(
+            descripcion="Fumigación Preventiva",
+            prioridad="alta",
+            registrado_por=self.user
+        )
+        
+        # 5. Insumo en inventario
+        self.insumo = Insumo.objects.create(
+            descripcion="Fungicida Organico X",
+            cantidad_existente=50.0, # 50 Kg/L disponibles
+            tipo="fungicida",
+            registrado_por=self.user
+        )
+
+    ## --- PRUEBAS DE CICLO AGRÍCOLA ---
+    def test_crear_ciclo_agricola(self):
+        """Verifica la correcta creación de un ciclo de cultivo en una zona."""
+        ciclo = Ciclo.objects.create(
+            id_cultivo=self.cultivo,
+            id_zonaagricola=self.zona,
+            fecha_inicio=date(2026, 5, 1),
+            fecha_fin=date(2026, 8, 1),
+            cantidad_produccion=1200.5, # Cosecha estimada/real en Kg
+            registrado_por=self.user
+        )
+        
+        self.assertEqual(ciclo.id_cultivo.descripcion, "Tomate Chonto")
+        self.assertEqual(ciclo.id_zonaagricola.nombre, "Invernadero 1")
+        self.assertEqual(ciclo.cantidad_produccion, 1200.5)
+        self.assertIn("Ciclo de Tomate Chonto", str(ciclo))
+
+    ## --- PRUEBAS DE ACTIVIDADES DENTRO DEL CICLO ---
+    def test_programar_actividad_en_ciclo(self):
+        """Valida que se pueda agendar una actividad específica dentro de un ciclo."""
+        # Primero creamos el ciclo necesario
+        ciclo = Ciclo.objects.create(
+            id_cultivo=self.cultivo,
+            id_zonaagricola=self.zona,
+            fecha_inicio=date(2026, 5, 1),
+            fecha_fin=date(2026, 8, 1),
+            cantidad_produccion=0.0,
+            registrado_por=self.user
+        )
+        
+        # Programamos la actividad para este ciclo
+        actividad_ciclo = CicloActividad.objects.create(
+            id_ciclo=ciclo,
+            id_actividad=self.actividad,
+            fecha_programada=date(2026, 5, 15),
+            color="#FF5733",
+            registrado_por=self.user
+        )
+        
+        self.assertEqual(actividad_ciclo.id_actividad.descripcion, "Fumigación Preventiva")
+        self.assertEqual(actividad_ciclo.color, "#FF5733")
+        self.assertIn("Fumigación Preventiva en Tomate Chonto", str(actividad_ciclo))
+
+    ## --- PRUEBAS DE ASIGNACIÓN DE INSUMOS ---
+    def test_asignar_insumo_a_actividad_de_ciclo(self):
+        """Prueba el registro del gasto real de un insumo en una actividad programada."""
+        # 1. Crear ciclo
+        ciclo = Ciclo.objects.create(
+            id_cultivo=self.cultivo,
+            id_zonaagricola=self.zona,
+            fecha_inicio=date(2026, 5, 1),
+            fecha_fin=date(2026, 8, 1),
+            cantidad_produccion=0.0,
+            registrado_por=self.user
+        )
+        
+        # 2. Crear actividad en el ciclo
+        actividad_ciclo = CicloActividad.objects.create(
+            id_ciclo=ciclo,
+            id_actividad=self.actividad,
+            fecha_programada=date(2026, 5, 15),
+            registrado_por=self.user
+        )
+        
+        # 3. Asignar el insumo utilizado
+        insumo_utilizado = CicloActividadInsumo.objects.create(
+            actividad_ciclo=actividad_ciclo,
+            id_insumo=self.insumo,
+            cantidad_utilizada=4.5, # Se gastaron 4.5 Kg
+            registrado_por=self.user
+        )
+        
+        self.assertEqual(insumo_utilizado.id_insumo.descripcion, "Fungicida Organico X")
+        self.assertEqual(insumo_utilizado.cantidad_utilizada, 4.5)
+        # Validar que la relación hacia atrás (relación inversa) funcione mediante el __str__
+        self.assertIn("Fungicida Organico X usado en Actividad Fumigación Preventiva", str(insumo_utilizado))
