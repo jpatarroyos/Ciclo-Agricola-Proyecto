@@ -1,27 +1,46 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from .models import ZonaAgricola, Personal
+from .models import ZonaAgricola, Cultivo, Ciclo, CicloMonitoreo, Actividad, Insumo, CicloActividad, CicloActividadInsumo, Personal
 
 
 class AgriculturaModelsTestCase(TestCase):
 
     def setUp(self):
-        """
-        Configuración inicial para las pruebas. 
-        Se ejecuta antes de cada método de prueba.
-        """
-        # 1. Crear un usuario de prueba
+        """Configuración de la infraestructura base para las pruebas."""
         self.user = User.objects.create_user(
-            username="admin_campo",
-            email="admin@finca.com",
-            password="PasswordSeguro123"
+            username="supervisor_campo",
+            password="PasswordSeguro2026",
+            email="admin@finca.com"
+        )
+        
+        self.zona = ZonaAgricola.objects.create(
+            nombre="Lote Este",
+            ubicacion="Sección C",
+            direccion="Km 2",
+            registrado_por=self.user
+        )
+        
+        self.cultivo = Cultivo.objects.create(
+            descripcion="Papa Pastusa",
+            tiempo_agricola=120,
+            registrado_por=self.user
+        )
+        
+        # Creamos un ciclo base que usaremos en ambas pruebas
+        self.ciclo = Ciclo.objects.create(
+            id_cultivo=self.cultivo,
+            id_zonaagricola=self.zona,
+            fecha_inicio=date(2026, 6, 1),
+            fecha_fin=date(2026, 10, 1),
+            cantidad_produccion=0.0,
+            registrado_por=self.user
         )
 
     ## --- PRUEBAS DE USUARIOS ---
     def test_crear_usuario(self):
         """Verifica que un usuario se cree correctamente con sus atributos."""
-        self.assertEqual(self.user.username, "admin_campo")
+        self.assertEqual(self.user.username, "supervisor_campo")
         self.assertEqual(self.user.email, "admin@finca.com")
         self.assertTrue(self.user.is_active)
 
@@ -200,3 +219,66 @@ class GestionCiclosYActividadesTestCase(TestCase):
         self.assertEqual(insumo_utilizado.cantidad_utilizada, 4.5)
         # Validar que la relación hacia atrás (relación inversa) funcione mediante el __str__
         self.assertIn("Fungicida Organico X usado en Actividad Fumigación Preventiva", str(insumo_utilizado))
+
+class MonitoreoYBorradoTestCase(TestCase):
+
+    def setUp(self):
+        """Configuración de la infraestructura base para las pruebas."""
+        self.user = User.objects.create_user(
+            username="supervisor_campo",
+            password="PasswordSeguro2026"
+        )
+        
+        self.zona = ZonaAgricola.objects.create(
+            nombre="Lote Este",
+            ubicacion="Sección C",
+            direccion="Km 2",
+            registrado_por=self.user
+        )
+        
+        self.cultivo = Cultivo.objects.create(
+            descripcion="Papa Pastusa",
+            tiempo_agricola=120,
+            registrado_por=self.user
+        )
+        
+        # Creamos un ciclo base que usaremos en ambas pruebas
+        self.ciclo = Ciclo.objects.create(
+            id_cultivo=self.cultivo,
+            id_zonaagricola=self.zona,
+            fecha_inicio=date(2026, 6, 1),
+            fecha_fin=date(2026, 10, 1),
+            cantidad_produccion=0.0,
+            registrado_por=self.user
+        )
+
+    ## --- PRUEBAS DE OBSERVACIONES DE MONITOREO ---
+    def test_crear_observacion_monitoreo(self):
+        """Valida que se registren bitácoras u observaciones sobre un ciclo activo."""
+        bitacora = CicloMonitoreo.objects.create(
+            id_ciclo=self.ciclo,
+            observacion="Se detectaron indicios leves de plaga (tizón tardío) en las hojas inferiores. Se recomienda revisión.",
+            fecha=date(2026, 6, 15),
+            registrado_por=self.user
+        )
+        
+        # Validar persistencia de los datos
+        self.assertEqual(bitacora.id_ciclo, self.ciclo)
+        self.assertIn("tizón tardío", bitacora.observacion)
+        self.assertEqual(bitacora.fecha, date(2026, 6, 15))
+        
+        # Validar método __str__
+        self.assertIn("Papa Pastusa el 2026-06-15", str(bitacora))
+
+    ## --- PRUEBAS DE BORRADO EN CASCADA (INTEGRIDAD REFERENCIAL) ---
+    def test_eliminacion_cultivo_borra_ciclos_en_cascada(self):
+        """Verifica que al eliminar un Cultivo, se borren automáticamente sus Ciclos asociados (CASCADE)."""
+        # Aseguramos primero que el ciclo existe en la base de datos
+        self.assertTrue(Ciclo.objects.filter(id_ciclo=self.ciclo.id_ciclo).exists())
+        
+        # Acto: Eliminamos el cultivo padre
+        self.cultivo.delete()
+        
+        # Afirmación: El ciclo asociado debió desaparecer debido al on_delete=models.CASCADE
+        ciclo_existe = Ciclo.objects.filter(id_ciclo=self.ciclo.id_ciclo).exists()
+        self.assertFalse(ciclo_existe, "El ciclo no se eliminó en cascada al borrar su cultivo.")
