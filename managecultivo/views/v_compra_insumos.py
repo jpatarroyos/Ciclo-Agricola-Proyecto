@@ -43,6 +43,7 @@ def gestionar_insumos(request):
                 cantidad=cantidad,
                 registrado_por=request.user
             )
+
             messages.success(request, "Compra registrada correctamente.")
             return redirect(f"/compra_insumos/?insumo={insumo_id}")
 
@@ -53,6 +54,15 @@ def gestionar_insumos(request):
             compra.cantidad = request.POST.get("cantidad")
             compra.save()
             return redirect(f"/compra_insumos/?insumo={compra.id_insumo.id_insumo}")
+        
+        # LÓGICA DE ELIMINACIÓN
+        if "eliminar_compra" in request.POST:
+            compra_id = request.POST.get("compra_id")
+            compra = get_object_or_404(CompraInsumo, pk=compra_id)
+            insumo = compra.id_insumo
+            compra.delete()
+            messages.success(request, "Registro de compra eliminado correctamente.")
+            return redirect(f"/compra_insumos/?insumo={insumo.id_insumo}")
 
     
     return render(request, "compra_insumos.html", {
