@@ -42,6 +42,26 @@ def crear_personal(request):
         persona.save()
         messages.success(request, "the personal "+ nombre + " was changed successfully.") 
         return redirect("crear_personal")
+    
+    # LÓGICA DE ELIMINACIÓN.(falta mejorarla)
+    if request.method == "POST" and "eliminar_persona" in request.POST:
+        id_cedula = request.POST.get("persona_id")
+        persona_d = get_object_or_404(Personal, pk=id_cedula)
+        #comprobar que no hayan ciclos
+        if persona_d.fk_CultivoActividadPersonal_Base2.exists():
+            # Si existen cultivos con ese personal, enviamos un mensaje de error y detenemos el borrado
+            messages.error(request, f"No se puede eliminar la persona '{persona_d.nombre}' porque tiene actividades agrícolas asociados.")
+        elif persona_d.fk_CicloActividadPersonal2.exists():
+            # Si existen ciclos con ese personal, enviamos un mensaje de error y detenemos el borrado
+            messages.error(request, f"No se puede eliminar la persona '{persona_d.nombre}' porque tiene ciclos agricolas asociados.")
+           
+        else:
+            # Si está limpio, se borra con éxito
+            persona_d.delete()
+            messages.success(request, "Persona eliminada correctamente.")
+
+        return redirect("crear_personal")
+        
         
     return render(request, "crear_personal.html", {"personas": personas})
 
