@@ -50,7 +50,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center justify-center gap-2">
                   <button type="button"
-                          onclick="document.getElementById('modalEditar{{ zona.pk }}').classList.remove('hidden')"
+                          onclick="abrirModal('{{ zona.pk }}')"
                           class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs">
                     Editar
                   </button>
@@ -112,35 +112,46 @@
 
 
 <!-- 2. Modal Modificar Zona Agrícola (Editar en bucle) -->
-{% for zona in zonas %}
-  <!-- Forzamos la conversión segura del ID de la zona a cadena de texto plana -->
-  {% with id_zona_texto=zona.pk|stringformat:"s" %}
-    {% with id_modal_editar="modalEditar"|add:id_zona_texto %}
+<!-- 2. Modal Modificar Zona Agrícola (Editar con JS) -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalEditar" modal_titulo="📝 Modificar Zona Agrícola" modal_attrs='id="formEditarZona"' %}
 
-      {% include 'componentes/modal_abrir.html' with modal_id=id_modal_editar modal_titulo="📝 Modificar Zona Agrícola" %}
-        
-        <!-- Subtítulo original integrado al cuerpo -->
-        <p class="text-xs text-gray-400 -mt-2 mb-2">Actualice los datos o límites asociados a esta parcela física.</p>
-        
-        <input type="hidden" name="zona_id" value="{{ zona.pk }}">
-        
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
-          <input type="text" name="nombre" value="{{ zona.nombre }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
-          <input type="text" name="ubicacion" value="{{ zona.ubicacion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
-          <input type="text" name="direccion" value="{{ zona.direccion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
-        </div>
+    
+  <!-- Subtítulo original integrado al cuerpo -->
+  <p class="text-xs text-gray-400 -mt-2 mb-2">Actualice los datos o límites asociados a esta parcela física.</p>
+  
+   <!-- Campo oculto para el ID de la zona, requerido por JavaScript -->
+  <input type="hidden" name="zona_id" id="ZonaIdInput">
 
-      {% include 'componentes/modal_cerrar.html' with modal_id=id_modal_editar submit_name="editar_zonaagricola" boton_texto="Guardar" %}
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
+    <input type="text" name="nombre" id="nombreInput" value="{{ zona.nombre }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
+    <input type="text" name="ubicacion" id="ubicacionInput" value="{{ zona.ubicacion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
+    <input type="text" name="direccion" id="direccionInput" value="{{ zona.direccion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalEditar" submit_name="editar_zonaagricola" boton_texto="Guardar" %}
 
-    {% endwith %}
-  {% endwith %}
-{% endfor %}
+<script>
+  function abrirModal(id) {
+    id = parseInt(id); 
+    fetch(`/zona/${id}/`) 
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById("modalEditar").classList.remove("hidden");
+
+          document.getElementById("ZonaIdInput").value = data.zona.pk;
+          document.getElementById("nombreInput").value = data.zona.nombre;
+          document.getElementById("ubicacionInput").value = data.zona.ubicacion;
+          document.getElementById("direccionInput").value = data.zona.direccion;
+      });
+  }
+</script>
+
+
 
 {% endblock %}

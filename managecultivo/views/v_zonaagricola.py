@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from ..models import ZonaAgricola
+from django.http import JsonResponse
 from django.contrib import messages
 
 @login_required
@@ -19,6 +20,7 @@ def crear_zonaagricola(request):
             direccion=direccion,
             registrado_por=request.user
         )
+        messages.success(request, "Zona creada correctamente.") #esto es para el panel admin de django
         return redirect("crear_zonaagricola")
 
     # Editar zona
@@ -33,6 +35,7 @@ def crear_zonaagricola(request):
         zona.ubicacion = ubicacion
         zona.direccion = direccion
         zona.save()
+        messages.success(request, "the zona "+ nombre + " was changed successfully.") 
         return redirect("crear_zonaagricola")
     
     # LÓGICA DE ELIMINACIÓN.(falta mejorarla)
@@ -52,3 +55,22 @@ def crear_zonaagricola(request):
         
 
     return render(request, "crear_zonaagricola.html", {"zonas": zonas})
+
+
+
+#Funcion para los modales
+def zona_detalle(request, id):
+    try:
+        zona = ZonaAgricola.objects.get(pk=id)
+    except ZonaAgricola.DoesNotExist:
+        return JsonResponse({"error": "zona no encontrada"}, status=404)
+
+    data = {
+        "zona": {
+            "pk": zona.pk,
+            "nombre": zona.nombre,
+            "ubicacion": zona.ubicacion,
+            "direccion": zona.direccion,
+        }
+    }
+    return JsonResponse(data)
