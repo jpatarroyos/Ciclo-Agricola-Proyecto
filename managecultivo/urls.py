@@ -42,7 +42,9 @@ urlpatterns = [
     path("monitorear_ciclo/", views.ciclo_monitoreo, name="monitorear_ciclo"),
     path("ajustar_ciclo/<int:ciclo_id>/", views.ajustar_ciclo, name="ajustar_ciclo"),
     path("calendario_ciclo/", views.calendario_ciclo, name="calendario_ciclo"), 
-    path("borrar_cultivo/", views.borrar_cultivo, name="borrar_cultivo"),    
+    path("borrar_cultivo/", views.borrar_cultivo, name="borrar_cultivo"),
+    path("borrar_actividad/", views.borrar_actividad, name="borrar_actividad"),
+    path("borrar_insumo/", views.borrar_insumo, name="borrar_insumo"),
 ]
 # pahth ("", views.funcion, name = "")
 
