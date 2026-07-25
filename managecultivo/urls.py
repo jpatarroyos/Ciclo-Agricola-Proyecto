@@ -15,7 +15,9 @@ urlpatterns = [
     path("bienvenida/", views.bienvenida, name="bienvenida"),    
 
     path('crear-usuario/', views.crear_usuario, name='crear_usuario'),
+
     path("crear_zonaagricola/", views.crear_zonaagricola, name="crear_zonaagricola"),   
+    path("zona/<int:id>/", views.v_zonaagricola.zona_detalle, name="zona_detalle"),
     
     
         # Vista principal: lista de personas, crear y editar
