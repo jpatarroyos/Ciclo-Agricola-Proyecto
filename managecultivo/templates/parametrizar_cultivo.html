@@ -330,7 +330,8 @@
 {% include 'componentes/modal_cerrar.html' with modal_id="modalCrearCultivo" submit_name="guardar_cultivo" %}
 
 <!-- 2. Modal Borrar Cultivo -->
-{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarCultivo" modal_titulo="🗑️ Borrar Cultivo" modal_attrs='action="/borrar_cultivo/"' %}
+
+{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarCultivo" modal_titulo="🗑️ Borrar Cultivo" modal_attrs='action="/borrar_cultivo/" onsubmit="return confirm(\'¿Está seguro de que desea eliminar este cultivo?\');"' %}
   <div>
     <label for="cultivo_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione el cultivo a eliminar:</label>
     <select id="cultivo_borrar" name="id_cultivo" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" required>
@@ -359,7 +360,7 @@
 {% include 'componentes/modal_cerrar.html' with modal_id="modalCrearActividad" submit_name="guardar_actividad" %}
 
 <!-- 4. Modal Borrar Actividad -->
-{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarActividad" modal_titulo="🗑️ Borrar Actividad Catalogo" modal_attrs='action="/borrar_actividad/"' %}
+{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarActividad" modal_titulo="🗑️ Borrar Actividad Catalogo" modal_attrs='action="/borrar_actividad/" onsubmit="return confirm(\'¿Está seguro de que desea eliminar esta actividad?\');"' %}
   <div>
     <label for="actividad_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione la actividad a eliminar:</label>
     <select id="actividad_borrar" name="id_actividad" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" required>
@@ -392,7 +393,7 @@
 {% include 'componentes/modal_cerrar.html' with modal_id="modalCrearInsumo" submit_name="guardar_insumo" %}
 
 <!-- 6. Modal Borrar Insumo -->
-{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarInsumo" modal_titulo="🗑️ Borrar Insumo" modal_attrs='action="/borrar_insumo/"' %}
+{% include 'componentes/modal_abrir.html' with modal_id="modalBorrarInsumo" modal_titulo="🗑️ Borrar Insumo" modal_attrs='action="/borrar_insumo/" onsubmit="return confirm(\'¿Está seguro de eliminar este insumo?\');"' %}
   <div>
     <label for="insumo_borrar" class="block text-sm font-medium text-gray-700 mb-1">Seleccione el insumo a eliminar:</label>
     <select id="insumo_borrar" name="id_insumo" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-red-500 focus:border-red-500 p-2 text-sm" required>

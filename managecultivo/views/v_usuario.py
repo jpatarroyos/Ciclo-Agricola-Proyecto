@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import Group, User
+from django.http import JsonResponse
+from django.contrib import messages
 
 #Crea o edita Usuarios
 @login_required
@@ -23,6 +25,8 @@ def crear_usuario(request):
             group = Group.objects.get(name=group_name)
             user.groups.add(group)
 
+        messages.success(request, "Usuario creado correctamente.") #esto es para el panel admin de django
+
         return redirect("crear_usuario")
 
     # Editar usuario
@@ -43,6 +47,30 @@ def crear_usuario(request):
             user.groups.add(group)
 
         user.save()
+        messages.success(request, "Usuario "+ user.username + " was changed successfully.")         
         return redirect("crear_usuario")
 
     return render(request, "crear_usuario.html", {"usuarios": usuarios})
+
+#Funcion para los modales
+
+def usuario_detalle(request, id):
+    try:
+        usuario = User.objects.get(pk=id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "Usuario no encontrado"}, status=404)
+
+    # Obtenemos de forma segura el nombre del primer grupo si existe
+    primer_grupo = usuario.groups.first()
+    nombre_grupo = primer_grupo.name if primer_grupo else "Sin grupo"
+
+    data = {
+        "usuario": {  # Cambiado de "zona" a "usuario" para coincidir con JS
+            "pk": usuario.pk,
+            "nombre": usuario.username, # Coincide con data.usuario.nombre
+            "email": usuario.email,     # Coincide con data.usuario.email
+            "group": nombre_grupo,      # Cambiado de "group_name" a "group"
+        }
+    }
+    return JsonResponse(data)
+

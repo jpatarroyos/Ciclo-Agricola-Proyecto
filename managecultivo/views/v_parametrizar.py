@@ -71,6 +71,7 @@ def crear_cultivo(request):
             tiempo_agricola=tiempo_agricola,
             registrado_por=request.user
         )
+        messages.success(request, f"El cultivo '{descripcion}' fue creado correctamente.")
     return redirect("parametrizar_cultivo")
 
 
@@ -105,6 +106,7 @@ def crear_actividad(request):
             prioridad=prioridad,   
             registrado_por=request.user
         )
+        messages.success(request, f"La actividad '{descripcion}' fue creada correctamente.")
     return redirect("parametrizar_cultivo")
 
 @login_required
@@ -145,6 +147,7 @@ def crear_insumo(request):
             tipo=tipo,
             registrado_por=request.user
         )
+        messages.success(request, f"El insumo '{descripcion}' fue creado correctamente.")
         return redirect("parametrizar_cultivo")
 
     # Si es GET, pasamos los choices al template
