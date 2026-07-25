@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from ..models import Insumo, CompraInsumo, CicloActividadInsumo
+from django.http import JsonResponse
+from django.contrib import messages
 
 from django.db.models import Sum
 from django.utils.timezone import now
-from django.contrib import messages
 import datetime
 
 @login_required
@@ -53,9 +54,10 @@ def gestionar_insumos(request):
             compra.marca = request.POST.get("marca")
             compra.cantidad = request.POST.get("cantidad")
             compra.save()
+            messages.success(request, "the compra  was changed successfully.")             
             return redirect(f"/compra_insumos/?insumo={compra.id_insumo.id_insumo}")
         
-        # LÓGICA DE ELIMINACIÓN
+
         if "eliminar_compra" in request.POST:
             compra_id = request.POST.get("compra_id")
             compra = get_object_or_404(CompraInsumo, pk=compra_id)
@@ -76,3 +78,21 @@ def gestionar_insumos(request):
     })
 
     
+#Funcion para los modales
+
+
+def compra_detalle(request, id):
+    try:
+        compra = CompraInsumo.objects.get(pk=id)
+    except CompraInsumo.DoesNotExist:
+        return JsonResponse({"error": "Compra no encontrada"}, status=404)
+
+    data = {
+        "compra": {
+            "id": compra.id,
+            "fecha_compra": compra.fecha_compra.strftime('%Y-%m-%d') if compra.fecha_compra else "",
+            "marca": compra.marca,
+            "cantidad": float(compra.cantidad), 
+        }
+    }
+    return JsonResponse(data)

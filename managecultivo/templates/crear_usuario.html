@@ -49,10 +49,10 @@
                         </td>
                         <td class="px-6 py-4 text-center whitespace-nowrap">
                             <button type="button"
-                                    onclick="document.getElementById('modalEditar{{ usuario.id }}').classList.remove('hidden')"
-                                    class="inline-flex items-center bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm transition-colors cursor-pointer">
-                                Editar
-                            </button>
+                                    onclick="abrirModal('{{ usuario.pk }}')"
+                                    class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs">
+                              Editar
+                            </button>                          
                         </td>
                     </tr>
                     {% endfor %}
@@ -62,9 +62,12 @@
     </div>
 
 </div>
+<!-- ======================================================= -->
+<!-- SECCIÓN DE MODALES PARA ZONAS AGRÍCOLAS    -->
+<!-- ======================================================= -->
 
+<!-- 1. Modal Registrar Usuarios (Crear) -->
 <!-- Modal Crear -->
-<!-- 1. Abrimos el modal inyectando la validación JS en los atributos -->
 {% include 'componentes/modal_abrir.html' with modal_id="modalCrear" modal_titulo="👤 Crear Usuario" modal_attrs='onsubmit="return validar_crear(this)"' %}
 
   <!-- 2. Inputs particulares del usuario -->
@@ -96,85 +99,95 @@
 
 
 
-<!-- Modal Editar (uno por usuario) -->
-{% for usuario in usuarios %}
-  <!-- Convertimos de forma segura el ID numérico a texto para evitar sumas matemáticas en Django -->
-  {% with id_usuario_texto=usuario.id|stringformat:"s" %}
-    {% with id_modal_editar="modalEditar"|add:id_usuario_texto %}
+<!-- 2. Modal Modificar Usuario (Editar en bucle) -->
+<!-- 2. Modal Modificar Usuario (Editar con JS) -->
 
-      <!-- 1. Abrimos el componente pasando el ID limpio y la validación JS -->
-      {% include 'componentes/modal_abrir.html' with modal_id=id_modal_editar modal_titulo="✏️ Editar Usuario" modal_attrs='onsubmit="return validar_editar(this)"' %}
+<!-- 1. Abrimos el componente pasando el ID limpio y la validación JS -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalEditar" modal_titulo="✏️ Modificar Usuario" modal_attrs='onsubmit="return validar_editar(this)"' %}
 
-        <!-- 2. Inputs particulares del usuario a editar -->
-        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
-        
-        <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
-          <input type="text" value="{{ usuario.username }}" disabled class="border border-gray-200 bg-gray-50 text-gray-500 rounded-lg px-3 py-2 w-full text-sm cursor-not-allowed">
-        </div>
-        
-        <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
-          <input type="email" name="email" value="{{ usuario.email }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
-          <select name="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            <option value="Administrador" {% if usuario.groups.first.name == "Administrador" %}selected{% endif %}>Administrador</option>
-            <option value="Agricultor" {% if usuario.groups.first.name == "Agricultor" %}selected{% endif %}>Agricultor</option>
-          </select>
-        </div>
+  <!-- 2. Inputs particulares del usuario a editar -->
+  <input type="hidden" name="usuario_id" id="usuarioInput" value="{{ usuario.id }}">
+  
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Usuario:</label>
+    <input type="text" name="nombre" id="nombreInput" value="{{ usuario.username }}" disabled class="border border-gray-200 bg-gray-50 text-gray-500 rounded-lg px-3 py-2 w-full text-sm cursor-not-allowed">
+  </div>
+  
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">E-mail:</label>
+    <input type="email" name="email" id="emailInput" value="{{ usuario.email }}" class="border border-gray-300 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required>
+  </div>
+  
+  <div>
+    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Grupo:</label>
+    <select name="group" id="group" class="border border-gray-300 bg-white rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+      <option value="Administrador" {% if usuario.groups.first.name == "Administrador" %}selected{% endif %}>Administrador</option>
+      <option value="Agricultor" {% if usuario.groups.first.name == "Agricultor" %}selected{% endif %}>Agricultor</option>
+    </select>
+  </div>
 
-      <!-- 3. Cerramos el componente con el mismo ID y el disparador del botón -->
-      {% include 'componentes/modal_cerrar.html' with modal_id=id_modal_editar submit_name="editar_usuario" %}
+<!-- 3. Cerramos el componente con el mismo ID y el disparador del botón -->
+{% include 'componentes/modal_cerrar.html' with modal_id="modalEditar" submit_name="editar_usuario" boton_texto="Guardar" %} 
 
-    {% endwith %}
-  {% endwith %}
-{% endfor %}
 
 <script>
-function validar_crear(form) {
-  const username = form.username.value.trim();
-  const email = form.email.value.trim();
-  const password = form.password.value.trim();
-  const group = form.group.value.trim();
-
-  if (!username || !email || !password || !group) {
-    alert("Todos los campos son obligatorios");
-    return false;
+  function abrirModal(id) {
+      id = parseInt(id); 
+      fetch(`/usuario/${id}/`) 
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById("modalEditar").classList.remove("hidden");
+          
+          // Ahora estas asignaciones funcionarán perfectamente:
+          document.getElementById("usuarioInput").value = data.usuario.pk;
+          document.getElementById("nombreInput").value = data.usuario.nombre;
+          document.getElementById("emailInput").value = data.usuario.email;
+          document.getElementById("group").value = data.usuario.group;
+      })
+      .catch(error => console.error("Error en fetch:", error));
   }
 
-  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!regexEmail.test(email)) {
-    alert("El correo electrónico no es válido");
-    return false;
+  function validar_crear(form) {
+    const username = form.username.value.trim();
+    const email = form.email.value.trim();
+    const password = form.password.value.trim();
+    const group = form.group.value.trim();
+
+    if (!username || !email || !password || !group) {
+      alert("Todos los campos son obligatorios");
+      return false;
+    }
+
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(email)) {
+      alert("El correo electrónico no es válido");
+      return false;
+    }
+
+    if (password.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres");
+      return false;
+    }
+
+    return true;
   }
 
-  if (password.length < 6) {
-    alert("La contraseña debe tener al menos 6 caracteres");
-    return false;
+  function validar_editar(form) {
+    const email = form.email.value.trim();
+    const group = form.group.value.trim();
+
+    if (!email || !group) {
+      alert("El email y el grupo son obligatorios");
+      return false;
+    }
+
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(email)) {
+      alert("El correo electrónico no es válido");
+      return false;
+    }
+
+    return true;
   }
-
-  return true;
-}
-
-function validar_editar(form) {
-  const email = form.email.value.trim();
-  const group = form.group.value.trim();
-
-  if (!email || !group) {
-    alert("El email y el grupo son obligatorios");
-    return false;
-  }
-
-  const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!regexEmail.test(email)) {
-    alert("El correo electrónico no es válido");
-    return false;
-  }
-
-  return true;
-}
 </script>
 {% endblock %}
