@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.timezone import now
 from django.contrib import messages
 
-from ..models import Cultivo,Actividad, CultivoActividad, CultivoActividadPersonal,Insumo,CultivoActividadInsumo, Personal, UnidadTiempo
+from ..models import CicloActividadInsumo, CompraInsumo, Cultivo,Actividad, CultivoActividad, CultivoActividadPersonal,Insumo,CultivoActividadInsumo, Personal, UnidadTiempo
 
 @login_required
 # filtra la tabla
@@ -71,6 +71,28 @@ def crear_cultivo(request):
             tiempo_agricola=tiempo_agricola,
             registrado_por=request.user
         )
+        messages.success(request, f"El cultivo '{descripcion}' fue creado correctamente.")
+    return redirect("parametrizar_cultivo")
+
+
+
+@login_required
+def borrar_cultivo(request):
+    if request.method == "POST":
+        id_cultivo = request.POST.get("id_cultivo")
+        
+        if id_cultivo:
+            cultivo = get_object_or_404(Cultivo, id_cultivo=id_cultivo)
+            
+            # Comprobamos si el cultivo tiene ciclos asociados usando el related_name "fk_ciclo1"
+            if cultivo.fk_ciclo1.exists():
+                # Si existen ciclos, enviamos un mensaje de error y detenemos el borrado
+                messages.error(request, f"No se puede eliminar el cultivo '{cultivo.descripcion}' porque tiene ciclos agrícolas asociados.")
+            else:
+                # Si está limpio, se borra con éxito
+                cultivo.delete()
+                messages.success(request, f"El cultivo '{cultivo.descripcion}' fue eliminado correctamente.")
+            
     return redirect("parametrizar_cultivo")
 
 
@@ -84,6 +106,32 @@ def crear_actividad(request):
             prioridad=prioridad,   
             registrado_por=request.user
         )
+        messages.success(request, f"La actividad '{descripcion}' fue creada correctamente.")
+    return redirect("parametrizar_cultivo")
+
+@login_required
+def borrar_actividad(request):
+    """
+    Elimina un catálogo maestro de Actividad.
+    Valida si está siendo usado en la parametrización de algún cultivo.
+    """
+    if request.method == "POST":
+        id_actividad = request.POST.get("id_actividad")
+        if id_actividad:
+            actividad = get_object_or_404(Actividad, pk=id_actividad)
+            
+            # Comprobamos si está vinculada a alguna parametrización de cultivo
+            tiene_cultivos = CultivoActividad.objects.filter(id_actividad=actividad).exists()
+            
+            if tiene_cultivos:
+                messages.error(
+                    request, 
+                    f"No se puede eliminar la actividad '{actividad.descripcion}' porque está programada en uno o más cultivos."
+                )
+            else:
+                actividad.delete()
+                messages.success(request, f"La actividad '{actividad.descripcion}' fue eliminada correctamente.")
+                
     return redirect("parametrizar_cultivo")
 
 @login_required
@@ -99,11 +147,40 @@ def crear_insumo(request):
             tipo=tipo,
             registrado_por=request.user
         )
+        messages.success(request, f"El insumo '{descripcion}' fue creado correctamente.")
         return redirect("parametrizar_cultivo")
 
     # Si es GET, pasamos los choices al template
     tipos = Insumo.TIPOS
     return render(request, "crear_insumo.html", {"tipos": tipos})
+
+@login_required
+def borrar_insumo(request):
+    """
+    Elimina un Insumo maestro.
+    Valida compras, uso en campo y asignaciones sugeridas a cultivos.
+    """
+    if request.method == "POST":
+        id_insumo = request.POST.get("id_insumo")
+        if id_insumo:
+            insumo = get_object_or_404(Insumo, pk=id_insumo)
+
+            # 1. Comprobamos si tiene compras asociadas
+            tiene_compras = CompraInsumo.objects.filter(id_insumo=insumo).exists()
+            # 3. Comprobamos si está asignado conceptualmente en algún cultivo
+            tiene_sugerencias = CultivoActividadInsumo.objects.filter(id_insumo=insumo).exists()
+
+            if tiene_compras or tiene_sugerencias:
+                messages.error(
+                    request, 
+                    f"No se puede eliminar el insumo '{insumo.descripcion}' porque posee registros asociados "
+                    f"(compras, uso en campo o parametrizaciones de cultivos)."
+                )
+            else:
+                insumo.delete()
+                messages.success(request, f"El insumo '{insumo.descripcion}' fue eliminado correctamente.")
+
+    return redirect("parametrizar_cultivo")
 
 
 @login_required

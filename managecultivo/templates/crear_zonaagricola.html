@@ -47,12 +47,25 @@
               <td class="px-5 py-3.5 text-gray-600 truncate max-w-xs" title="{{ zona.direccion }}">
                 {{ zona.direccion }}
               </td>
-              <td class="px-5 py-3.5 text-center">
-                <button type="button"
-                        onclick="document.getElementById('modalEditar{{ zona.pk }}').classList.remove('hidden')"
-                        class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs">
-                  Editar
-                </button>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center justify-center gap-2">
+                  <button type="button"
+                          onclick="abrirModal('{{ zona.pk }}')"
+                          class="bg-[var(--edit)] hover:bg-[var(--editFocus)] text-[var(--secondary)] font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer shadow-2xs">
+                    Editar
+                  </button>
+
+                  <form method="post" onsubmit="return confirm('¿Está seguro de que desea eliminar esta zona agrícola?');" class="inline-block m-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="zona_id" value="{{ zona.pk}}">
+                    <button type="submit" name="eliminar_zona" title="Eliminar registro" class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+
               </td>
             </tr>
           {% empty %}
@@ -72,85 +85,72 @@
 
 </div>
 
-<div id="modalCrear" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
-    
-    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">🚜 Registrar Zona Agrícola</h3>
-    <p class="text-xs text-gray-400 mb-4">Ingrese la información física y geográfica del nuevo espacio de cultivo.</p>
-    
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
-        <input type="text" name="nombre" placeholder="Ej: Lote Norte A, Invernadero 2..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
+<!-- ======================================================= -->
+<!-- SECCIÓN DE MODALES PARA ZONAS AGRÍCOLAS    -->
+<!-- ======================================================= -->
 
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
-        <input type="text" name="ubicacion" placeholder="Ej: Sección 4, Coordenadas H-12..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
+<!-- 1. Modal Registrar Zona Agrícola (Crear) -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalCrear" modal_titulo="🚜 Crear Zona Agrícola" %}
+  
+  <!-- Subtítulo original integrado al cuerpo -->
+  <p class="text-xs text-gray-400 -mt-2 mb-2">Ingrese la información física y geográfica del nuevo espacio de cultivo.</p>
 
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
-        <input type="text" name="direccion" placeholder="Ej: Km 5 Vía Principal, margen izquierdo..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
-      
-      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" 
-                onclick="document.getElementById('modalCrear').classList.add('hidden')" 
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="submit" name="crear_zonaagricola" 
-                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
-          Guardar Zona
-        </button>
-      </div>
-    </form>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
+    <input type="text" name="nombre" placeholder="Ej: Lote Norte A, Invernadero 2..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
   </div>
-</div>
-
-{% for zona in zonas %}
-<div id="modalEditar{{ zona.pk }}" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 transform transition-all animate-fade-in">
-    
-    <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">📝 Modificar Zona Agrícola</h3>
-    <p class="text-xs text-gray-400 mb-4">Actualice los datos o límites asociados a esta parcela física.</p>
-    
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="zona_id" value="{{ zona.pk }}">
-      
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
-        <input type="text" name="nombre" value="{{ zona.nombre }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
-        <input type="text" name="ubicacion" value="{{ zona.ubicacion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
-
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
-        <input type="text" name="direccion" value="{{ zona.direccion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-hidden" required>
-      </div>
-      
-      <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" 
-                onclick="document.getElementById('modalEditar{{ zona.pk }}').classList.add('hidden')" 
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
-          Cancelar
-        </button>
-        <button type="submit" name="editar_zonaagricola" 
-                class="bg-[var(--primary)] hover:bg-[var(--focus)] text-[var(--secondary)] font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer shadow-2xs">
-          Guardar Cambios
-        </button>
-      </div>
-    </form>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
+    <input type="text" name="ubicacion" placeholder="Ej: Sección 4, Coordenadas H-12..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
   </div>
-</div>
-{% endfor %}
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
+    <input type="text" name="direccion" placeholder="Ej: Km 5 Vía Principal, margen izquierdo..." class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+
+{% include 'componentes/modal_cerrar.html' with modal_id="modalCrear" submit_name="crear_zonaagricola" boton_texto="Guardar" %}
+
+
+<!-- 2. Modal Modificar Zona Agrícola (Editar en bucle) -->
+<!-- 2. Modal Modificar Zona Agrícola (Editar con JS) -->
+{% include 'componentes/modal_abrir.html' with modal_id="modalEditar" modal_titulo="📝 Modificar Zona Agrícola" modal_attrs='id="formEditarZona"' %}
+
+  <!-- Subtítulo original integrado al cuerpo -->
+  <p class="text-xs text-gray-400 -mt-2 mb-2">Actualice los datos o límites asociados a esta parcela física.</p>
+  
+   <!-- Campo oculto para el ID de la zona, requerido por JavaScript -->
+  <input type="hidden" name="zona_id" id="ZonaIdInput">
+
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre de la Zona:</label>
+    <input type="text" name="nombre" id="nombreInput" value="{{ zona.nombre }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación:</label>
+    <input type="text" name="ubicacion" id="ubicacionInput" value="{{ zona.ubicacion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dirección / Referencia:</label>
+    <input type="text" name="direccion" id="direccionInput" value="{{ zona.direccion }}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5 text-sm focus:bg-white focus:border-[var(--focus)] transition-all outline-none" required>
+  </div>
+{% include 'componentes/modal_cerrar.html' with modal_id="modalEditar" submit_name="editar_zonaagricola" boton_texto="Guardar" %}
+
+<script>
+  function abrirModal(id) {
+    id = parseInt(id); 
+    fetch(`/zona/${id}/`) 
+      .then(response => response.json())
+      .then(data => {
+          document.getElementById("modalEditar").classList.remove("hidden");
+
+          document.getElementById("ZonaIdInput").value = data.zona.pk;
+          document.getElementById("nombreInput").value = data.zona.nombre;
+          document.getElementById("ubicacionInput").value = data.zona.ubicacion;
+          document.getElementById("direccionInput").value = data.zona.direccion;
+      });
+  }
+</script>
+
+
 
 {% endblock %}
